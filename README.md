@@ -5,6 +5,10 @@ detected, flattened, straightened, cleaned up and framed like a proper scan, the
 PDF, JPG or PNG. No account, no subscription. Everything runs on your device; nothing is uploaded.
 
 ## Features
+- Mobile-first dark design: Home with tools and recent scans, Files, Tools and Me tabs, and a big camera button
+- Share straight to Gmail, Messenger, Viber, Drive or any app through the phone's share menu, as one PDF or as JPG images
+- Camera modes: Single (scan then review), Batch (many pages in a row) and ID Card (front and back on one A4 page)
+- Merge several documents into one
 - Live camera scanning with automatic capture when the page is steady, plus a manual shutter
 - Import one or many photos
 - Automatic edge detection and perspective correction, with draggable corners, undo/redo and reset

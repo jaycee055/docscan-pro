@@ -3,152 +3,231 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0F1316">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>DocScan Pro</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
-  --paper:#F6F7F4; --surface:#E7EBE6; --raised:#FFFFFF; --ink:#1C2328; --muted:#5D6870; --line:#CDD3CF;
-  --pen:#2747C9; --pen-ink:#FFFFFF; --danger:#B3261E; --good:#1F7A4D; --fair:#A15C00;
-  --stage:#12171B; --stage-2:#1D252B; --stage-ink:#E9EDEA; --stage-muted:#94A0A8; --guide:#8EA2FF; --ready:#5BE39B;
-  color-scheme:light; box-sizing:border-box;
-  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --paper:#14191D; --surface:#1F262B; --raised:#1A2025; --ink:#E9EDEA; --muted:#9AA5AC; --line:#323B41;
-    --pen:#8EA2FF; --pen-ink:#0E1430; --danger:#FF8A80; --good:#6FD39E; --fair:#F2B45A; color-scheme:dark;
-  }
-}
-:root[data-theme="dark"]{
-  --paper:#14191D; --surface:#1F262B; --raised:#1A2025; --ink:#E9EDEA; --muted:#9AA5AC; --line:#323B41;
-  --pen:#8EA2FF; --pen-ink:#0E1430; --danger:#FF8A80; --good:#6FD39E; --fair:#F2B45A; color-scheme:dark;
+  --bg:#0F1316; --panel:#192025; --panel-2:#222A30; --panel-3:#2B353C; --ink:#EEF2F0; --muted:#97A2A8; --line:#2A3339;
+  --accent:#5B8CFF; --accent-ink:#0B1430; --danger:#FF7A70; --good:#4FD18B; --fair:#F2B45A; --star:#F5C451;
+  --guide:#8EA2FF; --ready:#5BE39B; --stage:#0B0F12; --stage-2:#1D252B; --stage-ink:#E9EDEA; --stage-muted:#94A0A8;
+  --tabbar-h:64px; --safe-b:env(safe-area-inset-bottom,0px); --safe-t:env(safe-area-inset-top,0px);
+  color-scheme:dark; box-sizing:border-box;
 }
 *,*::before,*::after{box-sizing:inherit}
-html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px);background:var(--paper)}
-body{height:100%;margin:0;background:var(--paper);color:var(--ink);display:flex;flex-direction:column;
-  font-family:"Schibsted Grotesk",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.45;-webkit-tap-highlight-color:transparent}
+html{height:100%;background:var(--bg)}
+body{height:100%;margin:0;background:var(--bg);color:var(--ink);overflow:hidden;
+  font-family:"Schibsted Grotesk",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.4;-webkit-tap-highlight-color:transparent}
 button,select,input{font:inherit;color:inherit}
 button{cursor:pointer}
-:focus-visible{outline:3px solid var(--pen);outline-offset:2px}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 [hidden]{display:none!important}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
-header.top{padding:18px 20px 6px;display:flex;align-items:center;justify-content:space-between;gap:12px;max-width:1080px;width:100%;margin:0 auto}
-.brand{display:flex;align-items:center;gap:10px;min-width:0}
-.brand svg{width:32px;height:38px;flex:none}
-.brand h1{margin:0;font-size:26px;font-weight:800;letter-spacing:-0.02em;line-height:1.05}
-.brand p{margin:2px 0 0;color:var(--muted);font-size:14px}
-main{flex:1;overflow-y:auto;padding:10px 20px 24px;max-width:1080px;width:100%;margin:0 auto}
+/* ---------- App shell ---------- */
+.app{position:fixed;inset:0;display:flex;flex-direction:column;max-width:600px;margin:0 auto;background:var(--bg)}
+@media (min-width:640px){.app{border-left:1px solid var(--line);border-right:1px solid var(--line)}}
+.tab{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:calc(var(--safe-t) + 14px) 16px calc(var(--tabbar-h) + var(--safe-b) + 28px)}
+.tabhead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:2px 0 14px}
+.tabhead h1{margin:0;font-size:26px;font-weight:800;letter-spacing:-.02em}
+.searchbox{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:0 14px;min-height:48px}
+.searchbox svg{width:20px;height:20px;color:var(--muted);flex:none}
+.searchbox input{flex:1;min-width:0;background:transparent;border:0;outline:0;font-size:16px;padding:12px 0}
+.searchbox input::placeholder{color:var(--muted)}
 
-.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:6px 0 18px}
-.search{flex:1 1 220px;min-height:44px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--raised)}
-.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--raised)}
-.seg button{border:0;background:transparent;padding:10px 14px;font-weight:500;min-height:44px}
-.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
-select{min-height:44px;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--raised)}
+/* tool grid */
+.tools{display:grid;grid-template-columns:repeat(4,1fr);gap:18px 6px;margin:22px 0 26px}
+.tool{background:transparent;border:0;padding:0;display:flex;flex-direction:column;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--ink);text-align:center;line-height:1.2}
+.tool .ic{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:var(--panel-2)}
+.tool .ic svg{width:26px;height:26px}
+.c-blue{color:#7FA6FF}.c-green{color:#58D69A}.c-amber{color:#F5B651}.c-pink{color:#FF8FB1}.c-violet{color:#B49BFF}.c-cyan{color:#5ED3E0}.c-red{color:#FF8A7A}.c-grey{color:#C4CCD1}
 
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:24px 18px}
-.card{display:flex;flex-direction:column;gap:7px;min-width:0}
-.cover{position:relative;padding:0;border:1px solid var(--line);background:#fff;border-radius:3px;aspect-ratio:3/4;display:grid;place-items:center;overflow:hidden;
-  box-shadow:0 1px 0 var(--line),0 6px 14px -10px rgba(20,30,40,.45);width:100%}
-.cover img{max-width:100%;max-height:100%;display:block}
-.cover .stack{position:absolute;right:6px;top:6px;background:rgba(28,35,40,.78);color:#fff;font-size:12px;padding:2px 8px;border-radius:20px}
-.cover .q{position:absolute;left:6px;bottom:6px;font-size:12px;font-weight:700;padding:3px 8px;border-radius:20px;color:#fff}
-.q.good{background:#1F7A4D}.q.fair{background:#A15C00}.q.bad{background:#B3261E}
-.cname{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cmeta{font-size:13px;color:var(--muted);display:flex;justify-content:space-between;gap:6px;align-items:center}
-.cwarn{font-size:13px;color:var(--fair);line-height:1.3}
-.star{border:0;background:transparent;padding:4px;border-radius:8px;color:var(--muted);display:grid;place-items:center;min-width:32px;min-height:32px}
-.star svg{width:20px;height:20px}
-.star[aria-pressed="true"]{color:#E2A100}
-.more{border:1px solid var(--line);background:transparent;border-radius:8px;min-width:32px;min-height:32px;display:grid;place-items:center;padding:0}
-.more svg{width:18px;height:18px}
+/* recents & list rows */
+.sheet{background:var(--panel);border-radius:22px;padding:6px 14px 10px;margin:0 -16px}
+.sechead{display:flex;align-items:center;justify-content:space-between;padding:14px 2px 8px}
+.sechead h2{margin:0;font-size:19px;font-weight:700}
+.linkbtn{background:transparent;border:0;color:var(--muted);font-weight:500;padding:8px 4px;display:inline-flex;align-items:center;gap:2px}
+.linkbtn svg{width:16px;height:16px}
+.row{display:grid;grid-template-columns:64px 1fr auto;gap:14px;align-items:center;padding:12px 2px;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.row .th{width:64px;height:82px;border-radius:6px;background:#fff center/cover no-repeat;border:1px solid var(--line);padding:0;overflow:hidden;display:block}
+.row .th img{width:100%;height:100%;object-fit:cover;object-position:top;display:block}
+.row .info{background:transparent;border:0;padding:0;text-align:left;min-width:0;display:flex;flex-direction:column;gap:5px}
+.row .nm{font-size:17px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .mt{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:10px}
+.row .mt svg{width:14px;height:14px;vertical-align:-2px}
+.row .side{display:flex;align-items:center;gap:2px}
+.iconbtn{width:44px;height:44px;border-radius:12px;border:0;background:transparent;display:grid;place-items:center;padding:0;color:var(--muted)}
+.iconbtn svg{width:22px;height:22px}
+.iconbtn.fav{color:var(--star)}
+.acts3{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:2px}
+.pillbtn{background:var(--panel-2);border:0;border-radius:10px;min-height:42px;font-weight:600;font-size:15px;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 10px}
+.pillbtn svg{width:18px;height:18px}
+.pillbtn.primary{background:var(--accent);color:var(--accent-ink)}
+.empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;color:var(--muted);padding:34px 10px}
+.empty .pg{width:84px;height:108px;border:2px dashed var(--panel-3);border-radius:6px}
+.empty h3{margin:4px 0 0;color:var(--ink);font-size:18px}
+.empty p{margin:0;max-width:34ch}
 
-.empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:44px 12px;gap:14px;color:var(--muted)}
-.empty .sheet{width:112px;height:146px;border:2px dashed var(--line);border-radius:4px;position:relative}
-.empty .sheet::before,.empty .sheet::after{content:"";position:absolute;left:18px;right:18px;height:6px;border-radius:3px;background:var(--line)}
-.empty .sheet::before{top:28px}.empty .sheet::after{top:46px;right:42px}
-.empty h2{margin:0;color:var(--ink);font-size:20px}
-.empty p{margin:0;max-width:40ch}
-.foot{margin-top:28px;color:var(--muted);font-size:14px;max-width:70ch}
+.seg{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:3px;gap:3px}
+.seg button{flex:1;border:0;background:transparent;border-radius:9px;min-height:40px;font-weight:600;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--panel-3);color:var(--ink)}
+.filesbar{display:flex;gap:10px;align-items:center;margin:12px 0 6px}
+.filesbar .seg{flex:1}
+select{min-height:44px;padding:8px 10px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
 
-.dochead{display:flex;align-items:center;gap:10px;margin:4px 0 16px;flex-wrap:wrap}
-.back{border:1px solid var(--line);background:var(--raised);border-radius:10px;min-height:44px;padding:8px 12px;display:inline-flex;align-items:center;gap:6px;font-weight:500}
-.back svg{width:18px;height:18px}
-.docname{border:0;background:transparent;font-size:22px;font-weight:800;letter-spacing:-0.01em;padding:4px 6px;border-radius:8px;text-align:left;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
-.docsub{color:var(--muted);font-size:14px;flex-basis:100%}
+/* tools tab */
+.toollist{display:flex;flex-direction:column;gap:10px}
+.trow{display:flex;align-items:center;gap:14px;background:var(--panel);border:0;border-radius:16px;padding:14px;text-align:left}
+.trow .ic{width:46px;height:46px;border-radius:14px;background:var(--panel-2);display:grid;place-items:center;flex:none}
+.trow .ic svg{width:24px;height:24px}
+.trow b{display:block;font-size:16px}
+.trow span{display:block;color:var(--muted);font-size:14px}
 
-.bar{border-top:1px solid var(--line);background:var(--paper)}
-.bar-inner{max-width:1080px;margin:0 auto;padding:12px 20px;display:flex;gap:10px}
-.btn{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:11px 14px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;text-decoration:none}
-.btn svg{width:20px;height:20px;flex:none}
-.bar .btn{flex:1}
-.btn.primary{background:var(--pen);border-color:var(--pen);color:var(--pen-ink)}
+/* me tab */
+.card{background:var(--panel);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:14px;margin-bottom:14px}
+.card h2{margin:0;font-size:17px}
+.check{display:flex;align-items:center;justify-content:space-between;gap:14px;font-size:15px}
+.switch{appearance:none;width:48px;height:28px;border-radius:14px;background:var(--panel-3);position:relative;flex:none;cursor:pointer;margin:0;transition:background .15s}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .15s}
+.switch:checked{background:var(--accent)}
+.switch:checked::after{transform:translateX(20px)}
+@media (prefers-reduced-motion:reduce){.switch,.switch::after{transition:none}}
+.field{display:flex;flex-direction:column;gap:6px;font-weight:500;font-size:14px;color:var(--muted)}
+.field input[type=text],.field input[type=number],.field select{min-height:46px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--panel-2);color:var(--ink);font-weight:400;font-size:16px;width:100%}
+.hint{font-size:14px;color:var(--muted);margin:0}
+.btn{border:0;background:var(--panel-2);border-radius:12px;padding:12px 14px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px}
+.btn svg{width:20px;height:20px}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
 .btn.danger{color:var(--danger)}
 .btn:disabled{opacity:.45;cursor:default}
-.iconbtn{border:1px solid var(--line);background:var(--raised);border-radius:12px;width:44px;height:44px;display:grid;place-items:center;padding:0;flex:none}
-.iconbtn svg{width:20px;height:20px}
-@media (min-width:720px){.bar .btn{flex:0 1 auto;min-width:160px}.bar-inner{justify-content:flex-end}}
+.about{color:var(--muted);font-size:14px;text-align:center;margin:20px 0 0}
 
-/* dialogs */
-dialog{border:0;border-radius:18px;padding:0;background:var(--paper);color:var(--ink);width:min(480px,calc(100% - 24px));max-height:calc(100% - 24px);box-shadow:0 30px 80px rgba(0,0,0,.35)}
-dialog::backdrop{background:rgba(10,14,18,.5)}
-.dlg{padding:20px;display:flex;flex-direction:column;gap:14px}
-.dlg h2{margin:0;font-size:21px;letter-spacing:-0.01em}
-.dlg p{margin:0}
-.field{display:flex;flex-direction:column;gap:6px;font-weight:500;font-size:14px}
-.field input[type=text],.field input[type=number],.field select{min-height:44px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--raised);font-weight:400;font-size:16px}
+/* ---------- Bottom tab bar ---------- */
+.tabbar{position:absolute;left:10px;right:10px;bottom:calc(10px + var(--safe-b));height:var(--tabbar-h);background:rgba(34,42,48,.94);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:32px;display:grid;grid-template-columns:1fr 1fr 84px 1fr 1fr;align-items:center;z-index:10;
+  box-shadow:0 10px 30px rgba(0,0,0,.45)}
+.tabbar button{background:transparent;border:0;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:12px;font-weight:500;color:var(--muted);height:100%;padding:0}
+.tabbar button svg{width:24px;height:24px}
+.tabbar button[aria-current="page"]{color:var(--ink)}
+.tabbar button[aria-current="page"] svg{color:var(--accent)}
+.fab{justify-self:center;width:66px!important;height:66px!important;border-radius:50%;background:var(--accent)!important;color:var(--accent-ink)!important;
+  margin-top:-26px;box-shadow:0 8px 22px rgba(91,140,255,.45),0 0 0 6px var(--bg);display:grid!important;place-items:center}
+.fab svg{width:30px!important;height:30px!important}
+
+/* ---------- Document screen ---------- */
+.screen{position:fixed;inset:0;max-width:600px;margin:0 auto;background:var(--bg);z-index:20;display:flex;flex-direction:column}
+.topbar{display:flex;align-items:center;gap:6px;padding:calc(var(--safe-t) + 8px) 8px 8px}
+.topbar .ttl{flex:1;min-width:0;background:transparent;border:0;text-align:left;font-size:19px;font-weight:700;padding:8px 6px;border-radius:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar .iconbtn{color:var(--ink)}
+.docsub{padding:0 18px 8px;color:var(--muted);font-size:14px}
+.docbody{flex:1;overflow-y:auto;padding:6px 16px 20px}
+.pgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px 14px}
+@media (min-width:480px){.pgrid{grid-template-columns:repeat(3,1fr)}}
+.pcard{display:flex;flex-direction:column;gap:6px;min-width:0}
+.pcover{position:relative;padding:0;border:0;background:#fff;border-radius:6px;aspect-ratio:3/4;display:grid;place-items:center;overflow:hidden;width:100%}
+.pcover img{max-width:100%;max-height:100%;display:block}
+.pcover .num{position:absolute;left:6px;top:6px;background:rgba(15,19,22,.8);color:#fff;font-size:12px;font-weight:700;padding:2px 8px;border-radius:20px}
+.pcover .q{position:absolute;right:6px;bottom:6px;font-size:11px;font-weight:700;padding:2px 7px;border-radius:20px;color:#08130D}
+.q.good{background:var(--good)}.q.fair{background:var(--fair)}.q.bad{background:var(--danger)}
+.pwarn{font-size:12.5px;color:var(--fair);line-height:1.3}
+.addpage{border:2px dashed var(--panel-3);background:transparent;border-radius:6px;aspect-ratio:3/4;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--muted);font-weight:600}
+.addpage svg{width:30px;height:30px}
+.dockbar{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:8px 10px calc(10px + var(--safe-b));background:var(--panel);border-top:1px solid var(--line)}
+.dockbar button{background:transparent;border:0;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12.5px;font-weight:600;padding:6px 0;border-radius:12px;color:var(--ink)}
+.dockbar button svg{width:24px;height:24px}
+.dockbar button.hl{color:var(--accent)}
+.dockbar button:disabled{opacity:.4}
+
+/* ---------- Dialogs as bottom sheets ---------- */
+dialog{border:0;padding:0;background:var(--panel);color:var(--ink);width:100%;max-width:600px;max-height:88vh;margin:auto auto 0;border-radius:22px 22px 0 0;
+  padding-bottom:var(--safe-b);box-shadow:0 -10px 40px rgba(0,0,0,.5)}
+@media (min-width:700px){dialog{margin:auto;max-width:480px;border-radius:20px;padding-bottom:0}}
+dialog::backdrop{background:rgba(0,0,0,.55)}
+.dlg{padding:10px 18px 18px;display:flex;flex-direction:column;gap:14px}
+.grab{width:40px;height:5px;border-radius:3px;background:var(--panel-3);margin:0 auto 2px}
+.dlg h2{margin:0;font-size:20px}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.check{display:flex;align-items:center;gap:10px;font-size:15px}
-.check input{width:20px;height:20px;accent-color:var(--pen);margin:0}
-.hint{font-size:14px;color:var(--muted)}
 .warnbox{font-size:14px;color:var(--fair);border-left:3px solid var(--fair);padding:2px 0 2px 10px}
 .acts{display:flex;gap:10px}.acts .btn{flex:1}
 .sheetlist{display:flex;flex-direction:column;gap:6px}
-.sheetlist button{text-align:left;border:0;background:var(--surface);border-radius:10px;padding:13px 14px;font-weight:500;min-height:48px}
+.sheetlist button{text-align:left;border:0;background:var(--panel-2);border-radius:12px;padding:14px;font-weight:600;min-height:50px;display:flex;align-items:center;gap:12px}
+.sheetlist button svg{width:20px;height:20px;color:var(--muted)}
 .sheetlist button.danger{color:var(--danger)}
-input[type=range]{width:100%;accent-color:var(--pen)}
+.sheetlist button.danger svg{color:var(--danger)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.ckline{display:flex;align-items:center;gap:10px;font-size:15px}
+.ckline input{width:20px;height:20px;accent-color:var(--accent);margin:0}
+.shareopts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.shareopt{background:var(--panel-2);border:2px solid transparent;border-radius:16px;padding:16px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;font-weight:700}
+.shareopt small{font-weight:400;color:var(--muted);font-size:13px;text-align:center}
+.shareopt svg{width:30px;height:30px}
+.shareopt[aria-pressed="true"]{border-color:var(--accent)}
+.apps{display:flex;gap:14px;justify-content:center;color:var(--muted);font-size:12px}
+.apps span{display:flex;flex-direction:column;align-items:center;gap:6px}
+.apps i{width:40px;height:40px;border-radius:12px;background:var(--panel-2);display:grid;place-items:center;font-style:normal}
+.apps i svg{width:22px;height:22px}
+.mergelist{display:flex;flex-direction:column;gap:6px;max-height:44vh;overflow-y:auto}
+.mergelist label{display:flex;align-items:center;gap:12px;background:var(--panel-2);border-radius:12px;padding:10px 12px}
+.mergelist img{width:34px;height:44px;object-fit:cover;object-position:top;border-radius:3px;background:#fff}
+.mergelist input{width:20px;height:20px;accent-color:var(--accent);margin:0}
+.mergelist .o{margin-left:auto;color:var(--accent);font-weight:700;min-width:1.2em;text-align:right}
 
-/* busy overlay */
-.busy-all{position:fixed;inset:0;z-index:60;background:rgba(10,14,18,.6);display:none;place-items:center;color:#fff}
+/* busy + toast */
+.busy-all{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.6);display:none;place-items:center;color:#fff}
 .busy-all.on{display:grid}
-.busy-all .box{background:var(--stage-2);border-radius:16px;padding:22px 24px;min-width:240px;text-align:center;display:flex;flex-direction:column;gap:12px}
-.prog{height:6px;background:#2E3840;border-radius:3px;overflow:hidden}
-.prog i{display:block;height:100%;background:var(--guide);width:0}
+.busy-all .box{background:var(--panel-2);border-radius:16px;padding:22px 24px;min-width:240px;text-align:center;display:flex;flex-direction:column;gap:12px}
+.prog{height:6px;background:var(--panel-3);border-radius:3px;overflow:hidden}
+.prog i{display:block;height:100%;background:var(--accent);width:0}
+.toast{position:fixed;left:50%;bottom:calc(var(--tabbar-h) + var(--safe-b) + 26px);transform:translateX(-50%);background:#EEF2F0;color:#0F1316;padding:11px 16px;border-radius:12px;font-size:14px;font-weight:500;
+  max-width:calc(100% - 32px);width:max-content;z-index:100;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.on{opacity:1}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
 
-/* scanner */
-.scanner{position:fixed;inset:0;background:#000;color:#fff;display:none;flex-direction:column;z-index:30;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+/* ---------- Camera ---------- */
+.scanner{position:fixed;inset:0;background:#000;color:#fff;display:none;flex-direction:column;z-index:50}
 .scanner.on{display:flex}
-.sc-top{display:flex;align-items:center;gap:8px;padding:10px 12px}
-.sc-top .grow{flex:1;text-align:center;color:#C9D1D6;font-size:15px}
-.dk{background:rgba(255,255,255,.12);border:0;color:#fff;border-radius:12px;min-height:44px;min-width:44px;padding:8px 12px;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-weight:500}
-.dk svg{width:20px;height:20px}
-.dk[aria-pressed="true"]{background:#fff;color:#000}
-.sc-view{flex:1;position:relative;overflow:hidden}
-.sc-view video,.sc-view canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
-.pill{position:absolute;left:50%;top:14px;transform:translateX(-50%);background:rgba(0,0,0,.65);padding:8px 16px;border-radius:22px;font-size:15px;white-space:nowrap;max-width:calc(100% - 24px);overflow:hidden;text-overflow:ellipsis}
+.sc-top{display:flex;align-items:center;gap:6px;padding:calc(var(--safe-t) + 8px) 10px 8px}
+.sc-top .grow{flex:1}
+.dk{background:transparent;border:0;color:#fff;border-radius:12px;min-height:46px;min-width:46px;padding:8px;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-weight:600;font-size:14px}
+.dk svg{width:26px;height:26px}
+.dk.on{color:var(--ready)}
+.sc-view{flex:1;position:relative;overflow:hidden;background:#000}
+.sc-view video,.sc-view canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.pill{position:absolute;left:50%;top:14px;transform:translateX(-50%);background:rgba(0,0,0,.62);padding:9px 16px;border-radius:22px;font-size:15px;white-space:nowrap;max-width:calc(100% - 24px);overflow:hidden;text-overflow:ellipsis}
 .flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
 .flash.on{animation:fl .35s ease-out}
 @keyframes fl{from{opacity:.85}to{opacity:0}}
-@media (prefers-reduced-motion: reduce){.flash.on{animation:none}}
+@media (prefers-reduced-motion:reduce){.flash.on{animation:none}}
+.idframe{position:absolute;left:8%;right:8%;top:50%;aspect-ratio:85.6/54;transform:translateY(-50%);border:2px dashed rgba(255,255,255,.75);border-radius:14px;pointer-events:none}
+.sbseg{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);display:flex;background:rgba(0,0,0,.55);border-radius:24px;padding:4px}
+.sbseg button{border:0;background:transparent;color:#fff;border-radius:20px;padding:8px 18px;font-weight:600;font-size:15px}
+.sbseg button[aria-pressed="true"]{background:rgba(255,255,255,.22)}
 .sc-err{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;gap:14px;background:#0B0F12}
 .sc-err p{max-width:38ch;margin:0;color:#C9D1D6}
 .sc-err h2{margin:0;font-size:20px}
-.sc-bottom{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:12px 18px 18px;gap:10px}
-.shutter{width:76px;height:76px;border-radius:50%;border:4px solid #fff;background:transparent;padding:5px}
+.modes{display:flex;gap:26px;justify-content:center;padding:12px 0 4px;overflow-x:auto}
+.modes button{background:transparent;border:0;color:#C9D1D6;font-size:17px;font-weight:600;padding:6px 2px;position:relative;white-space:nowrap}
+.modes button[aria-pressed="true"]{color:var(--accent)}
+.modes button[aria-pressed="true"]::before{content:"";position:absolute;left:50%;top:-8px;width:28px;height:4px;border-radius:2px;background:var(--accent);transform:translateX(-50%)}
+.sc-bottom{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:12px 22px calc(18px + var(--safe-b));gap:10px}
+.shutter{width:80px;height:80px;border-radius:50%;border:5px solid var(--accent);background:transparent;padding:5px}
 .shutter span{display:block;width:100%;height:100%;border-radius:50%;background:#fff}
 .shutter:active span{transform:scale(.92)}
-.last{justify-self:end;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);border:0;color:#fff;border-radius:12px;padding:6px 12px 6px 6px;min-height:56px;font-weight:700}
-.last img{width:36px;height:46px;object-fit:cover;border-radius:3px;background:#333}
-.sc-left{display:flex;gap:8px}
+.last{justify-self:end;display:flex;align-items:center;gap:8px;background:transparent;border:0;color:#fff;border-radius:12px;padding:4px;min-height:56px;font-weight:700}
+.last img{width:40px;height:52px;object-fit:cover;border-radius:4px;background:#333;border:2px solid #fff}
+.last .cnt{background:var(--accent);color:var(--accent-ink);border-radius:20px;min-width:24px;padding:2px 8px;font-size:13px}
 
-/* editor */
-.editor{position:fixed;inset:0;background:var(--stage);color:var(--stage-ink);display:none;flex-direction:column;z-index:40;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+/* ---------- Editor ---------- */
+.editor{position:fixed;inset:0;background:var(--stage);color:var(--stage-ink);display:none;flex-direction:column;z-index:60}
 .editor.on{display:flex}
-.ed-top{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px}
+.ed-top{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:calc(var(--safe-t) + 8px) 12px 8px}
 .ed-top h2{margin:0;font-size:15px;font-weight:500;color:var(--stage-muted);text-align:center;flex:1}
-.ghost{background:transparent;border:0;color:var(--stage-ink);padding:10px 12px;border-radius:10px;font-weight:500;min-width:72px;min-height:44px}
+.ghost{background:transparent;border:0;color:var(--stage-ink);padding:10px 12px;border-radius:10px;font-weight:600;min-width:72px;min-height:44px}
 .stage{flex:1;position:relative;display:grid;place-items:center;overflow:hidden;touch-action:none}
 .wrap{position:relative;touch-action:none}
 .wrap canvas.base{display:block;width:100%;height:100%;box-shadow:0 10px 30px rgba(0,0,0,.4)}
@@ -157,119 +236,170 @@ input[type=range]{width:100%;accent-color:var(--pen)}
 .handle::after{content:"";width:20px;height:20px;border-radius:50%;background:#fff;border:4px solid var(--guide);box-shadow:0 1px 6px rgba(0,0,0,.5)}
 .handle.active::after{transform:scale(1.25)}
 .loupe{position:absolute;top:12px;width:120px;height:120px;border-radius:50%;border:3px solid #fff;box-shadow:0 4px 18px rgba(0,0,0,.6);display:none;pointer-events:none;background:#000}
-.ed-bottom{padding:8px 12px 14px;display:flex;flex-direction:column;gap:12px;max-width:720px;width:100%;margin:0 auto}
-.row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.ed-bottom{padding:8px 12px calc(14px + var(--safe-b));display:flex;flex-direction:column;gap:12px;max-width:600px;width:100%;margin:0 auto}
+.erow{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
 .dbtn{background:var(--stage-2);border:1px solid #2E3840;color:var(--stage-ink);border-radius:12px;padding:10px 13px;font-weight:700;min-height:46px;display:inline-flex;align-items:center;gap:7px}
 .dbtn svg{width:19px;height:19px}
 .dbtn:disabled{opacity:.4}
 .dbtn[aria-pressed="true"]{background:var(--guide);border-color:var(--guide);color:#0E1430}
-.dbtn.go{background:var(--guide);border-color:var(--guide);color:#0E1430}
+.dbtn.go{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .filters{display:flex;gap:8px;overflow-x:auto;padding:2px}.filters>:first-child{margin-left:auto}.filters>:last-child{margin-right:auto}
 .chip{background:transparent;border:0;padding:0;display:flex;flex-direction:column;align-items:center;gap:5px;color:var(--stage-muted);font-size:12.5px;font-weight:500;min-width:62px;flex:none}
 .chip .sw{width:52px;height:66px;border-radius:6px;border:2px solid transparent;background:#2A333A;overflow:hidden}
 .chip .sw img{width:100%;height:100%;object-fit:cover;display:block}
 .chip[aria-pressed="true"]{color:var(--stage-ink)}
-.chip[aria-pressed="true"] .sw{border-color:var(--guide)}
+.chip[aria-pressed="true"] .sw{border-color:var(--accent)}
 .sliders{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;align-items:center;font-size:14px;color:var(--stage-muted)}
-.sliders input{accent-color:var(--guide)}
 .dcheck{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--stage-muted);justify-content:center}
-.dcheck input{accent-color:var(--guide);width:18px;height:18px}
+.dcheck input{accent-color:var(--accent);width:18px;height:18px}
 .busy{position:absolute;inset:0;display:none;place-items:center;background:rgba(18,23,27,.55);font-weight:500}
 .busy.on{display:grid}
 .qline{font-size:13px;color:var(--stage-muted);text-align:center;min-height:1.2em}
-
-.toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:10px;font-size:14px;max-width:calc(100% - 32px);z-index:70;opacity:0;pointer-events:none;transition:opacity .2s}
-.toast.on{opacity:1}
-@media (prefers-reduced-motion: reduce){.toast{transition:none}}
-.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
+<div class="app" id="app">
 
-<header class="top">
-  <div class="brand">
-    <svg viewBox="0 0 34 40" aria-hidden="true"><path d="M3 2h20l9 9v27H3z" fill="var(--pen)"/><path d="M23 2v9h9" fill="none" stroke="var(--paper)" stroke-width="2"/><path d="M9 20h16M9 26h16M9 32h10" stroke="var(--pen-ink)" stroke-width="2.5" stroke-linecap="round"/></svg>
-    <div><h1>DocScan Pro</h1><p>Free scanner. Your files stay on this device.</p></div>
-  </div>
-  <button class="iconbtn" id="settingsBtn" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></button>
-</header>
-
-<!-- Library -->
-<main id="libView">
-  <div class="toolbar">
-    <input class="search" id="search" type="search" placeholder="Search documents" aria-label="Search documents">
-    <div class="seg" role="group" aria-label="Show">
-      <button data-tab="all" aria-pressed="true">All</button>
-      <button data-tab="fav" aria-pressed="false">Favorites</button>
-      <button data-tab="trash" aria-pressed="false">Trash</button>
+  <!-- Home -->
+  <section class="tab" id="tabHome" aria-label="Home">
+    <label class="searchbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+      <input type="search" id="homeSearch" placeholder="Search your documents" aria-label="Search your documents"></label>
+    <div class="tools">
+      <button class="tool" data-act="scan"><span class="ic c-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M4 12h16"/></svg></span>Smart Scan</button>
+      <button class="tool" data-act="batch"><span class="ic c-cyan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="7" y="3" width="13" height="15" rx="1.5"/><path d="M4 7v12a2 2 0 0 0 2 2h10"/></svg></span>Batch Scan</button>
+      <button class="tool" data-act="import"><span class="ic c-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m3 17 5-5 4 4 3-3 6 5"/></svg></span>Import Images</button>
+      <button class="tool" data-act="id"><span class="ic c-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2.2"/><path d="M5.8 16c.6-1.5 1.8-2.3 3.2-2.3s2.6.8 3.2 2.3M14.5 10h4M14.5 13.5h3"/></svg></span>ID Card</button>
+      <button class="tool" data-act="merge"><span class="ic c-violet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M6 3h6l3 3v6M6 3v12h4"/><path d="M14 13h4l2 2v6h-8v-6z"/></svg></span>Merge Docs</button>
+      <button class="tool" data-act="fav"><span class="ic c-pink"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="m12 3 2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 16.8l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z"/></svg></span>Favorites</button>
+      <button class="tool" data-act="trash"><span class="ic c-red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg></span>Trash</button>
+      <button class="tool" data-act="tools"><span class="ic c-grey"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><circle cx="16.5" cy="16.5" r="3.5"/></svg></span>All</button>
     </div>
-    <select id="sort" aria-label="Sort by">
-      <option value="updated">Recently changed</option>
-      <option value="created">Date created</option>
-      <option value="name">Name</option>
-      <option value="size">File size</option>
-    </select>
-  </div>
-  <div class="empty" id="libEmpty" hidden>
-    <div class="sheet" aria-hidden="true"></div>
-    <h2 id="libEmptyTitle">No documents yet</h2>
-    <p id="libEmptyText">Scan with your camera or import photos. Each page is found, straightened, cropped and cleaned up automatically.</p>
-  </div>
-  <div class="grid" id="libGrid"></div>
-  <p class="foot" id="foot"></p>
-</main>
+    <div class="sheet">
+      <div class="sechead"><h2>Recents</h2><button class="linkbtn" id="viewAll">View all<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="m9 6 6 6-6 6"/></svg></button></div>
+      <div id="recents"></div>
+    </div>
+  </section>
 
-<!-- Document -->
-<main id="docView" hidden>
-  <div class="dochead">
-    <button class="back" id="backBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="m15 6-6 6 6 6"/></svg>Documents</button>
-    <button class="docname" id="docName" aria-label="Rename document"></button>
-    <div class="docsub" id="docSub"></div>
-  </div>
-  <div class="empty" id="docEmpty" hidden>
-    <div class="sheet" aria-hidden="true"></div>
-    <h2>No pages in this document</h2>
-    <p>Scan or import pages to add them here.</p>
-  </div>
-  <div class="grid" id="docGrid"></div>
-</main>
+  <!-- Files -->
+  <section class="tab" id="tabFiles" aria-label="Files" hidden>
+    <div class="tabhead"><h1>Files</h1></div>
+    <label class="searchbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+      <input type="search" id="filesSearch" placeholder="Search documents" aria-label="Search documents"></label>
+    <div class="filesbar">
+      <div class="seg" role="group" aria-label="Show">
+        <button data-ftab="all" aria-pressed="true">All</button>
+        <button data-ftab="fav" aria-pressed="false">Favorites</button>
+        <button data-ftab="trash" aria-pressed="false">Trash</button>
+      </div>
+      <select id="sort" aria-label="Sort by">
+        <option value="updated">Newest</option>
+        <option value="created">Created</option>
+        <option value="name">Name</option>
+        <option value="size">Size</option>
+      </select>
+    </div>
+    <div class="sheet" style="margin-top:8px"><div id="fileList"></div></div>
+  </section>
 
-<div class="bar"><div class="bar-inner" id="bar">
-  <button class="btn" id="scanBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span>Scan</span></button>
-  <button class="btn" id="importBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="1"/><path d="m4 16 5-5 4 4 3-3 4 4"/></svg><span>Import images</span></button>
-  <button class="btn primary" id="exportBtn" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M12 10v7m-3-3 3 3 3-3"/></svg>Export</button>
-</div></div>
+  <!-- Tools -->
+  <section class="tab" id="tabTools" aria-label="Tools" hidden>
+    <div class="tabhead"><h1>Tools</h1></div>
+    <div class="toollist" id="toolList"></div>
+  </section>
+
+  <!-- Me -->
+  <section class="tab" id="tabMe" aria-label="Me" hidden>
+    <div class="tabhead"><h1>Me</h1></div>
+    <div class="card">
+      <h2>Scanning</h2>
+      <label class="check">Capture automatically when the page is steady<input class="switch" type="checkbox" id="sAuto"></label>
+      <label class="check">Straighten crooked text<input class="switch" type="checkbox" id="sStraight"></label>
+      <label class="check">Tidy edges and margins<input class="switch" type="checkbox" id="sTidy"></label>
+      <label class="field">Detection sensitivity<select id="sSens"><option value="low">Careful (fewer mistakes)</option><option value="normal">Balanced</option><option value="high">Quick (captures sooner)</option></select></label>
+      <label class="field">Look for new pages<select id="sProfile"></select></label>
+    </div>
+    <div class="card">
+      <h2>PDF and sharing</h2>
+      <label class="field">Paper size<select id="sPaper">
+        <option value="a4">A4</option><option value="letter">Letter (short bond)</option><option value="long">Long bond 8.5 × 13 in</option><option value="legal">Legal</option><option value="a3">A3</option><option value="a5">A5</option><option value="original">Same shape as scan</option></select></label>
+      <label class="field">Quality when sharing<select id="sShareQ"><option value="small">Smaller file (good for chat)</option><option value="normal">Balanced</option><option value="high">High (for printing)</option></select></label>
+    </div>
+    <div class="card">
+      <h2>Storage</h2>
+      <p class="hint" id="sStorage"></p>
+      <button type="button" class="btn" id="sPersist">Ask the browser to keep my documents</button>
+      <button type="button" class="btn danger" id="sWipe">Delete all documents on this device</button>
+    </div>
+    <p class="about">DocScan Pro is free, with no account and no limits.<br>Your scans never leave this device unless you share them.</p>
+  </section>
+
+  <nav class="tabbar" aria-label="Main">
+    <button data-tab="home" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 10.5 12 4l8 6.5V20h-5v-6H9v6H4z"/></svg>Home</button>
+    <button data-tab="files"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Files</button>
+    <button class="fab" id="fab" aria-label="Scan a document"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button>
+    <button data-tab="tools"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>Tools</button>
+    <button data-tab="me"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.3-4 4.4-6 8-6s6.7 2 8 6"/></svg>Me</button>
+  </nav>
+</div>
+
+<!-- Document screen -->
+<section class="screen" id="docView" aria-label="Document" hidden>
+  <div class="topbar">
+    <button class="iconbtn" id="backBtn" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="m15 6-6 6 6 6"/></svg></button>
+    <button class="ttl" id="docName" aria-label="Rename document"></button>
+    <button class="iconbtn" id="docFav" aria-label="Favorite" aria-pressed="false"></button>
+    <button class="iconbtn" id="docMore" aria-label="More options"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></button>
+  </div>
+  <div class="docsub" id="docSub"></div>
+  <div class="docbody">
+    <div class="pgrid" id="docGrid"></div>
+  </div>
+  <div class="dockbar">
+    <button id="dAdd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>Add page</button>
+    <button id="dImport"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m3 17 5-5 4 4 3-3 6 5"/></svg>Import</button>
+    <button id="dExport"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M12 10v7m-3-3 3 3 3-3"/></svg>Save as</button>
+    <button id="dShare" class="hl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.4M8.2 13.2l7.6 4.4"/></svg>Share</button>
+  </div>
+</section>
+
 <input class="sr" type="file" accept="image/*" multiple id="importInput" tabindex="-1" aria-hidden="true">
 <input class="sr" type="file" accept="image/*" capture="environment" id="nativeCam" tabindex="-1" aria-hidden="true">
 
-<!-- Scanner -->
+<!-- Camera -->
 <section class="scanner" id="scanner" aria-label="Camera scanner">
   <div class="sc-top">
-    <button class="dk" id="scClose">Close</button>
-    <div class="grow" id="scCount">0 pages</div>
+    <button class="dk" id="scClose" aria-label="Close camera"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    <span class="grow"></span>
     <button class="dk" id="torchBtn" aria-label="Flash" aria-pressed="false" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M13 2 5 13h6l-1 9 8-11h-6z"/></svg></button>
+    <button class="dk" id="autoBtn" aria-pressed="true">AUTO</button>
     <button class="dk" id="flipBtn" aria-label="Switch camera"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9a8 8 0 0 1 14-3l2 2M20 15a8 8 0 0 1-14 3l-2-2M20 4v4h-4M4 20v-4h4"/></svg></button>
   </div>
   <div class="sc-view" id="scView">
     <video id="video" playsinline muted autoplay></video>
     <canvas id="ov"></canvas>
+    <div class="idframe" id="idFrame" hidden></div>
     <div class="pill" id="pill" aria-live="polite">Starting camera…</div>
     <div class="flash" id="flash"></div>
+    <div class="sbseg" id="sbSeg" role="group" aria-label="Scan mode">
+      <button data-sb="single" aria-pressed="true">Single</button>
+      <button data-sb="batch" aria-pressed="false">Batch</button>
+    </div>
     <div class="sc-err" id="scErr" hidden>
       <h2 id="scErrTitle">Camera unavailable</h2>
       <p id="scErrText"></p>
       <button class="btn primary" id="scNative">Use the phone’s camera app</button>
-      <button class="btn" id="scImport" style="background:#1D252B;color:#fff;border-color:#2E3840">Import images instead</button>
+      <button class="btn" id="scImport">Import images instead</button>
     </div>
   </div>
+  <div class="modes" role="group" aria-label="What to scan">
+    <button data-mode="id" aria-pressed="false">ID Card</button>
+    <button data-mode="scan" aria-pressed="true">Scan</button>
+  </div>
   <div class="sc-bottom">
-    <div class="sc-left">
-      <button class="dk" id="scGallery" aria-label="Import from gallery"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="1"/><path d="m4 16 5-5 4 4 3-3 4 4"/></svg></button>
-      <button class="dk" id="autoBtn" aria-pressed="true">Auto</button>
-    </div>
+    <div><button class="dk" id="scGallery" aria-label="Import from gallery"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m3 17 5-5 4 4 3-3 6 5"/></svg></button></div>
     <button class="shutter" id="shutter" aria-label="Capture page"><span></span></button>
-    <button class="last" id="scDone"><img id="lastThumb" alt=""><span id="doneLabel">Done</span></button>
+    <button class="last" id="scDone" hidden><img id="lastThumb" alt=""><span class="cnt" id="doneCount">1</span></button>
   </div>
 </section>
 
@@ -298,7 +428,7 @@ input[type=range]{width:100%;accent-color:var(--pen)}
     <div class="busy" id="edBusy">Processing your scan…</div>
   </div>
   <div class="ed-bottom" id="cropBar">
-    <div class="row">
+    <div class="erow">
       <button class="dbtn" id="undoBtn" aria-label="Undo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg></button>
       <button class="dbtn" id="redoBtn" aria-label="Redo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/></svg></button>
       <button class="dbtn" id="detectBtn">Find edges</button>
@@ -318,7 +448,7 @@ input[type=range]{width:100%;accent-color:var(--pen)}
     <label class="dcheck"><input type="checkbox" id="sharpen"> Sharpen text</label>
     <label class="dcheck"><input type="checkbox" id="tidy"> Tidy edges and margins</label>
     <label class="dcheck"><input type="checkbox" id="applyAll"> Use this look for every page in the document</label>
-    <div class="row">
+    <div class="erow">
       <button class="dbtn" id="recropBtn">Recrop</button>
       <button class="dbtn" id="rotLBtn" aria-label="Rotate left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12a8 8 0 1 0 2.3-5.6M4 4v5h5"/></svg></button>
       <button class="dbtn" id="rotRBtn" aria-label="Rotate right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5"/></svg></button>
@@ -327,10 +457,33 @@ input[type=range]{width:100%;accent-color:var(--pen)}
   </div>
 </section>
 
+<!-- Share -->
+<dialog id="shareDlg"><div class="dlg">
+  <div class="grab"></div>
+  <h2>Share</h2>
+  <div class="shareopts" role="group" aria-label="Send as">
+    <button type="button" class="shareopt" data-sf="pdf" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="#FF8A7A" stroke-width="2" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M9 13h6M9 16.5h4"/></svg>PDF<small>One file with every page</small></button>
+    <button type="button" class="shareopt" data-sf="jpg" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="#7FA6FF" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m3 17 5-5 4 4 3-3 6 5"/></svg>Images<small>One JPG per page</small></button>
+  </div>
+  <p class="hint" id="shareInfo"></p>
+  <div class="apps" aria-hidden="true">
+    <span><i><svg viewBox="0 0 24 24" fill="none" stroke="#FF8A7A" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 6.5 8.5 7 8.5-7"/></svg></i>Email</span>
+    <span><i><svg viewBox="0 0 24 24" fill="none" stroke="#7FA6FF" stroke-width="2" stroke-linejoin="round"><path d="M12 3C7 3 3 6.7 3 11.3c0 2.6 1.3 4.9 3.3 6.4V21l3-1.7c.9.3 1.8.4 2.7.4 5 0 9-3.7 9-8.3S17 3 12 3z"/><path d="m7.5 13 3-3.2 2.2 2 3.8-2"/></svg></i>Messenger</span>
+    <span><i><svg viewBox="0 0 24 24" fill="none" stroke="#58D69A" stroke-width="2" stroke-linejoin="round"><path d="M4 20l1.2-3.6A8 8 0 1 1 8 19.1z"/></svg></i>Chat apps</span>
+    <span><i><svg viewBox="0 0 24 24" fill="none" stroke="#C4CCD1" stroke-width="2" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/></svg></i>Files</span>
+  </div>
+  <p class="hint" id="shareStatus" aria-live="polite"></p>
+  <div class="acts">
+    <button class="btn" type="button" id="shareClose">Close</button>
+    <button class="btn primary" type="button" id="shareGo">Prepare</button>
+  </div>
+</div></dialog>
+
 <!-- Export -->
 <dialog id="exportDlg">
   <form class="dlg" method="dialog" id="exportForm">
-    <h2>Export</h2>
+    <div class="grab"></div>
+    <h2>Save as</h2>
     <div class="field">Format
       <div class="seg" role="group" aria-label="Format" id="fmtSeg">
         <button type="button" data-fmt="pdf" aria-pressed="true">PDF</button>
@@ -358,8 +511,8 @@ input[type=range]{width:100%;accent-color:var(--pen)}
       <label class="field">Resolution<select id="exDpi"><option value="150">150 DPI</option><option value="200">200 DPI</option><option value="300">300 DPI (print)</option></select></label>
     </div>
     <label class="field" id="qualRow">Image quality <input type="range" id="exQual" min="50" max="95" value="85"></label>
-    <label class="check"><input type="checkbox" id="exGray"> Grayscale</label>
-    <label class="check" id="numRow"><input type="checkbox" id="exNums"> Add page numbers</label>
+    <label class="ckline"><input type="checkbox" id="exGray"> Grayscale</label>
+    <label class="ckline" id="numRow"><input type="checkbox" id="exNums"> Add page numbers</label>
     <div class="hint" id="exEstimate"></div>
     <div class="warnbox" id="exWarn" hidden></div>
     <p class="hint" id="exStatus" aria-live="polite"></p>
@@ -370,27 +523,19 @@ input[type=range]{width:100%;accent-color:var(--pen)}
   </form>
 </dialog>
 
-<!-- Settings -->
-<dialog id="setDlg">
-  <form class="dlg" method="dialog">
-    <h2>Settings</h2>
-    <label class="check"><input type="checkbox" id="sAuto"> Capture automatically when the page is steady</label>
-    <label class="check"><input type="checkbox" id="sStraight"> Straighten crooked text automatically</label>
-    <label class="check"><input type="checkbox" id="sTidy"> Tidy edges and margins automatically</label>
-    <label class="field">Detection sensitivity<select id="sSens"><option value="low">Careful (fewer mistakes)</option><option value="normal">Balanced</option><option value="high">Quick (captures sooner)</option></select></label>
-    <label class="field">Default look for new pages<select id="sProfile"></select></label>
-    <label class="field">Default paper size<select id="sPaper">
-      <option value="a4">A4</option><option value="letter">Letter (short bond)</option><option value="long">Long bond 8.5 × 13 in</option><option value="legal">Legal</option><option value="a3">A3</option><option value="a5">A5</option><option value="original">Same shape as scan</option></select></label>
-    <p class="hint" id="sStorage"></p>
-    <button type="button" class="btn" id="sPersist">Ask the browser to keep my documents</button>
-    <button type="button" class="btn danger" id="sWipe">Delete all documents on this device</button>
-    <div class="acts"><button class="btn primary" value="ok">Done</button></div>
-  </form>
-</dialog>
+<!-- Merge -->
+<dialog id="mergeDlg"><div class="dlg">
+  <div class="grab"></div>
+  <h2>Merge documents</h2>
+  <p class="hint">Tick documents in the order you want them. Their pages are copied into a new document; the originals stay as they are.</p>
+  <div class="mergelist" id="mergeList"></div>
+  <div class="acts"><button class="btn" type="button" id="mergeClose">Cancel</button><button class="btn primary" type="button" id="mergeGo" disabled>Merge</button></div>
+</div></dialog>
 
 <!-- Action sheet / ask -->
-<dialog id="sheetDlg"><div class="dlg"><h2 id="sheetTitle"></h2><div class="sheetlist" id="sheetList"></div></div></dialog>
+<dialog id="sheetDlg"><div class="dlg"><div class="grab"></div><h2 id="sheetTitle"></h2><div class="sheetlist" id="sheetList"></div></div></dialog>
 <dialog id="askDlg"><form class="dlg" method="dialog" id="askForm">
+  <div class="grab"></div>
   <h2 id="askTitle"></h2><p id="askText" class="hint"></p>
   <label class="field" id="askField" hidden><span class="sr">Name</span><input type="text" id="askInput" autocomplete="off"></label>
   <div class="acts"><button class="btn" value="cancel" id="askNo">Cancel</button><button class="btn primary" value="ok" id="askYes">OK</button></div>
@@ -436,7 +581,7 @@ async function fileToCanvas(file){
 function scaled(c,maxSide){const k=Math.min(1,maxSide/Math.max(c.width,c.height)),o=mk(Math.max(1,Math.round(c.width*k)),Math.max(1,Math.round(c.height*k)));const x=o.getContext("2d");x.imageSmoothingQuality="high";x.drawImage(c,0,0,o.width,o.height);return o}
 
 /* ================= Settings ================= */
-const DEF={autoCapture:true,sens:"normal",profile:"smart",paper:"a4",autoStraighten:true,tidy:true};
+const DEF={autoCapture:true,sens:"normal",profile:"smart",paper:"a4",autoStraighten:true,tidy:true,shareQ:"normal"};
 let settings={...DEF};
 try{settings={...DEF,...JSON.parse(localStorage.getItem("dsp-settings")||"{}")}}catch(e){}
 function saveSettings(){try{localStorage.setItem("dsp-settings",JSON.stringify(settings))}catch(e){}}
@@ -727,7 +872,7 @@ async function newPageFromCanvas(src,docId,det){
 }
 
 /* ================= App state ================= */
-const S={docs:[],tab:"all",q:"",sort:"updated",doc:null,pages:[],urls:new Map(),scanTarget:null};
+const S={docs:[],ftab:"all",q:"",hq:"",sort:"updated",doc:null,pages:[],urls:new Map(),tab:"home"};
 function thumbURL(p){const k=p.id+":"+p.updatedAt;let u=S.urls.get(k);if(!u){u=URL.createObjectURL(p.thumb);S.urls.set(k,u)}return u}
 async function loadDocs(){S.docs=await db.all("docs")}
 function docSize(d){return d._size||0}
@@ -737,134 +882,218 @@ async function computeDocMeta(){
   S.docs.forEach(d=>{const ps=(by[d.id]||[]);d._size=ps.reduce((a,p)=>a+(p.size||0),0);
     const first=d.pageOrder.map(id=>ps.find(p=>p.id===id)).find(Boolean);d._cover=first||null});
 }
-async function createDoc(){
-  const now=new Date(),pad=v=>String(v).padStart(2,"0");
-  const d={id:uid(),name:`Scan ${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}.${pad(now.getMinutes())}`,
-    createdAt:Date.now(),updatedAt:Date.now(),favorite:false,trashed:false,pageOrder:[]};
+function docName(prefix){const now=new Date(),pad=v=>String(v).padStart(2,"0");
+  return `${prefix||"Scan"} ${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}.${pad(now.getMinutes())}`}
+async function createDoc(prefix){
+  const d={id:uid(),name:docName(prefix),createdAt:Date.now(),updatedAt:Date.now(),favorite:false,trashed:false,pageOrder:[]};
   await db.put("docs",d);S.docs.push(d);return d;
 }
 async function touchDoc(d){d.updatedAt=Date.now();const {_size,_cover,...rest}=d;await db.put("docs",rest)}
+async function pagesOf(d){const ps=await db.pagesOf(d.id);return d.pageOrder.map(id=>ps.find(p=>p.id===id)).filter(Boolean)}
+
+/* ================= Icons ================= */
+const I={
+  star:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 3 2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 16.8l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z"/></svg>',
+  starO:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="m12 3 2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 16.8l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z"/></svg>',
+  more:'<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>',
+  pages:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="7" y="3" width="13" height="15" rx="1.5"/><path d="M4 7v12a2 2 0 0 0 2 2h10"/></svg>',
+  share:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.4M8.2 13.2l7.6 4.4"/></svg>',
+  save:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M12 10v7m-3-3 3 3 3-3"/></svg>',
+  eye:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+  edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>',
+  copy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg>',
+  trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>',
+  restore:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12a8 8 0 1 0 2.3-5.6M4 4v5h5"/></svg>',
+  rotate:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5"/></svg>',
+  up:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="m15 6-6 6 6 6"/></svg>',
+  down:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="m9 6 6 6-6 6"/></svg>',
+  photo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m3 17 5-5 4 4 3-3 6 5"/></svg>',
+  cam:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>',
+  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+};
+const fmtWhen=t=>{const d=new Date(t),pad=v=>String(v).padStart(2,"0");return `${d.getMonth()+1}/${d.getDate()}/${String(d.getFullYear()).slice(2)} ${pad(d.getHours())}:${pad(d.getMinutes())}`};
 
 /* ================= Routing ================= */
+const TABS=["home","files","tools","me"];
 function route(){
-  const m=location.hash.match(/^#doc-([a-z0-9]+)$/);
-  if(m){const d=S.docs.find(x=>x.id===m[1]);if(d){openDocView(d);return}}
-  showLibrary();
+  const h=location.hash.slice(1);const m=h.match(/^doc-([a-z0-9]+)$/);
+  if(m){const d=S.docs.find(x=>x.id===m[1]);if(d&&!d.trashed){openDocView(d);return}}
+  $("#docView").hidden=true;S.doc=null;
+  showTab(TABS.includes(h)?h:"home");
 }
 window.addEventListener("hashchange",route);
-
-/* ================= Library ================= */
-const ICON_STAR='<svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 3 2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 16.8l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z"/></svg>';
-const ICON_STAR_O='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="m12 3 2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 16.8l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z"/></svg>';
-const ICON_MORE='<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>';
-async function showLibrary(){
-  S.doc=null;$("#libView").hidden=false;$("#docView").hidden=true;$("#exportBtn").hidden=true;
-  $("#scanBtn span").textContent="Scan";$("#importBtn").hidden=false;
-  await computeDocMeta();renderLibrary();
+async function showTab(t){
+  S.tab=t;
+  TABS.forEach(x=>{$("#tab"+x[0].toUpperCase()+x.slice(1)).hidden=x!==t});
+  $$(".tabbar [data-tab]").forEach(b=>{if(b.dataset.tab===t)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});
+  if(t==="home"||t==="files"){await computeDocMeta();renderHome();renderFiles()}
+  if(t==="me")loadMe();
 }
-function renderLibrary(){
-  let list=S.docs.filter(d=>S.tab==="trash"?d.trashed:!d.trashed&&(S.tab!=="fav"||d.favorite));
+const go=h=>{if(location.hash==="#"+h||(!h&&!location.hash))route();else location.hash=h};
+$$(".tabbar [data-tab]").forEach(b=>b.onclick=()=>go(b.dataset.tab==="home"?"":b.dataset.tab));
+$("#fab").onclick=()=>openScanner({mode:"scan",sb:"single"});
+$("#viewAll").onclick=()=>go("files");
+
+/* ================= Document rows ================= */
+function docRow(d,withActions){
+  const el=document.createElement("div");el.className="row";const n=d.pageOrder.length;
+  el.innerHTML=`<button class="th" aria-label="Open ${esc(d.name)}">${d._cover?`<img alt="" src="${thumbURL(d._cover)}">`:""}</button>
+    <button class="info"><span class="nm">${esc(d.name)}</span><span class="mt"><span>${fmtWhen(d.updatedAt)}</span><span>${I.pages} ${n}</span><span>${fmtSize(docSize(d))}</span></span></button>
+    <span class="side">${d.trashed?"":`<button class="iconbtn${d.favorite?" fav":""}" data-r="fav" aria-label="${d.favorite?"Remove from favorites":"Add to favorites"}" aria-pressed="${d.favorite}">${d.favorite?I.star:I.starO}</button>`}
+    <button class="iconbtn" data-r="more" aria-label="More for ${esc(d.name)}">${I.more}</button></span>
+    ${withActions&&!d.trashed&&n?`<div class="acts3"><button class="pillbtn" data-r="share">${I.share}Share</button><button class="pillbtn" data-r="save">${I.save}Save as</button><button class="pillbtn" data-r="view">${I.eye}View</button></div>`:""}`;
+  const open=()=>{if(d.trashed){docMenu(d);return}go("doc-"+d.id)};
+  el.querySelector(".th").onclick=open;el.querySelector(".info").onclick=open;
+  const f=el.querySelector('[data-r="fav"]');if(f)f.onclick=async()=>{d.favorite=!d.favorite;await touchDoc(d);renderHome();renderFiles()};
+  el.querySelector('[data-r="more"]').onclick=()=>docMenu(d);
+  const sh=el.querySelector('[data-r="share"]');if(sh)sh.onclick=()=>openShare(d);
+  const sv=el.querySelector('[data-r="save"]');if(sv)sv.onclick=async()=>{await openDoc(d);openExport()};
+  const vw=el.querySelector('[data-r="view"]');if(vw)vw.onclick=open;
+  return el;
+}
+function emptyBox(title,text){const e=document.createElement("div");e.className="empty";e.innerHTML=`<div class="pg"></div><h3>${esc(title)}</h3><p>${esc(text)}</p>`;return e}
+function renderHome(){
+  const box=$("#recents");box.innerHTML="";
+  let list=S.docs.filter(d=>!d.trashed);
+  if(S.hq)list=list.filter(d=>d.name.toLowerCase().includes(S.hq.toLowerCase()));
+  list.sort((a,b)=>b.updatedAt-a.updatedAt);
+  if(!list.length){box.appendChild(S.hq?emptyBox("No matches","Try another name."):emptyBox("No scans yet","Tap the camera button to scan a document, or import photos from your gallery."));return}
+  list.slice(0,S.hq?50:8).forEach((d,i)=>box.appendChild(docRow(d,i===0&&!S.hq)));
+}
+function renderFiles(){
+  const box=$("#fileList");box.innerHTML="";
+  let list=S.docs.filter(d=>S.ftab==="trash"?d.trashed:!d.trashed&&(S.ftab!=="fav"||d.favorite));
   if(S.q)list=list.filter(d=>d.name.toLowerCase().includes(S.q.toLowerCase()));
   const sorters={updated:(a,b)=>b.updatedAt-a.updatedAt,created:(a,b)=>b.createdAt-a.createdAt,name:(a,b)=>a.name.localeCompare(b.name),size:(a,b)=>docSize(b)-docSize(a)};
   list.sort(sorters[S.sort]);
-  const grid=$("#libGrid");grid.innerHTML="";
-  const empty=$("#libEmpty");empty.hidden=list.length>0;
-  if(!list.length){
-    $("#libEmptyTitle").textContent=S.q?"No matches":S.tab==="trash"?"Trash is empty":S.tab==="fav"?"No favorites yet":"No documents yet";
-    $("#libEmptyText").textContent=S.q?"Try another name.":S.tab==="trash"?"Documents you delete stay here until you remove them for good.":S.tab==="fav"?"Tap the star on a document to keep it here.":"Scan with your camera or import photos. Each page is found, straightened, cropped and cleaned up automatically.";
-  }
-  list.forEach(d=>{
-    const el=document.createElement("div");el.className="card";
-    const n=d.pageOrder.length;
-    el.innerHTML=`<button class="cover" aria-label="Open ${esc(d.name)}">${d._cover?`<img alt="" src="${thumbURL(d._cover)}">`:""}<span class="stack">${n} ${n===1?"page":"pages"}</span></button>
-      <div class="cname">${esc(d.name)}</div>
-      <div class="cmeta"><span>${fmtDate(d.updatedAt)} · ${fmtSize(docSize(d))}</span>
-      <span style="display:flex;gap:2px">${S.tab==="trash"?"":`<button class="star" aria-label="Favorite" aria-pressed="${d.favorite}">${d.favorite?ICON_STAR:ICON_STAR_O}</button>`}
-      <button class="more" aria-label="More for ${esc(d.name)}">${ICON_MORE}</button></span></div>`;
-    el.querySelector(".cover").onclick=()=>{if(d.trashed){docMenu(d);return}location.hash="doc-"+d.id};
-    const st=el.querySelector(".star");if(st)st.onclick=async()=>{d.favorite=!d.favorite;await touchDoc(d);renderLibrary()};
-    el.querySelector(".more").onclick=()=>docMenu(d);
-    grid.appendChild(el);
-  });
-  updateFoot();
+  if(!list.length){box.appendChild(S.q?emptyBox("No matches","Try another name."):S.ftab==="trash"?emptyBox("Trash is empty","Deleted documents stay here until you remove them for good."):S.ftab==="fav"?emptyBox("No favorites yet","Tap the star on a document to keep it here."):emptyBox("No documents yet","Your scans will appear here."));return}
+  list.forEach(d=>box.appendChild(docRow(d,false)));
 }
-async function updateFoot(){
-  let t="Documents are saved in this browser only. Nothing is uploaded. Clearing your browser data removes them, so export anything you need to keep.";
-  try{if(navigator.storage&&navigator.storage.estimate){const e=await navigator.storage.estimate();t=`Using ${fmtSize(e.usage||0)} on this device. `+t}}catch(e){}
-  if(store.mem)t="Saving isn’t available in this view, so documents disappear when you close the page. Export before leaving.";
-  $("#foot").textContent=t;$("#sStorage").textContent=t;
-}
-$("#search").oninput=e=>{S.q=e.target.value.trim();renderLibrary()};
-$("#sort").onchange=e=>{S.sort=e.target.value;renderLibrary()};
-$$(".seg [data-tab]").forEach(b=>b.onclick=()=>{S.tab=b.dataset.tab;$$(".seg [data-tab]").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));renderLibrary()});
+function setFilesTab(t){S.ftab=t;$$("[data-ftab]").forEach(x=>x.setAttribute("aria-pressed",String(x.dataset.ftab===t)));renderFiles()}
+$("#homeSearch").oninput=e=>{S.hq=e.target.value.trim();renderHome()};
+$("#filesSearch").oninput=e=>{S.q=e.target.value.trim();renderFiles()};
+$("#sort").onchange=e=>{S.sort=e.target.value;renderFiles()};
+$$("[data-ftab]").forEach(b=>b.onclick=()=>setFilesTab(b.dataset.ftab));
 
+/* ================= Sheets & prompts ================= */
 function sheet(title,items){
   const dlg=$("#sheetDlg"),list=$("#sheetList");$("#sheetTitle").textContent=title;list.innerHTML="";
-  items.forEach(([label,fn,danger])=>{const b=document.createElement("button");b.textContent=label;if(danger)b.className="danger";b.onclick=()=>{dlg.close();fn()};list.appendChild(b)});
-  const c=document.createElement("button");c.textContent="Cancel";c.onclick=()=>dlg.close();list.appendChild(c);
+  items.forEach(([label,fn,danger,icon])=>{const b=document.createElement("button");b.innerHTML=(icon||"")+"<span></span>";b.querySelector("span").textContent=label;if(danger)b.className="danger";b.onclick=()=>{dlg.close();fn()};list.appendChild(b)});
+  const c=document.createElement("button");c.textContent="Cancel";c.style.justifyContent="center";c.onclick=()=>dlg.close();list.appendChild(c);
   dlg.showModal();
 }
-$("#sheetDlg").addEventListener("click",e=>{if(e.target.id==="sheetDlg")e.target.close()});
+$$("dialog").forEach(d=>d.addEventListener("click",e=>{if(e.target===d)d.close()}));
 function ask(title,text,okLabel,danger,inputValue){
   return new Promise(res=>{const dlg=$("#askDlg");$("#askTitle").textContent=title;$("#askText").textContent=text||"";$("#askText").hidden=!text;
     const f=$("#askField"),inp=$("#askInput");f.hidden=inputValue==null;if(inputValue!=null)inp.value=inputValue;
-    const yes=$("#askYes");yes.textContent=okLabel||"OK";yes.className="btn "+(danger?"primary":"primary");yes.style.background=danger?"var(--danger)":"";yes.style.borderColor=danger?"var(--danger)":"";
+    const yes=$("#askYes");yes.textContent=okLabel||"OK";yes.style.background=danger?"var(--danger)":"";yes.style.color=danger?"#2A0A08":"";
     dlg.returnValue="";dlg.showModal();if(inputValue!=null)setTimeout(()=>{inp.focus();inp.select()},30);
     dlg.onclose=()=>{const ok=dlg.returnValue==="ok";res(inputValue!=null?(ok?inp.value.trim():null):ok)}});
 }
 async function docMenu(d){
-  if(d.trashed){sheet(d.name,[["Restore",async()=>{d.trashed=false;await touchDoc(d);renderLibrary();toast("Document restored")}],
-    ["Delete forever",async()=>{if(await ask("Delete forever?",`“${d.name}” and its ${d.pageOrder.length} pages will be removed from this device.`,"Delete",true))await deleteDocForever(d)},true]]);return}
-  sheet(d.name,[["Open",()=>{location.hash="doc-"+d.id}],["Rename",()=>renameDoc(d)],["Duplicate",()=>duplicateDoc(d)],
-    ["Export",async()=>{location.hash="doc-"+d.id;setTimeout(openExport,60)}],
-    ["Move to trash",async()=>{d.trashed=true;await touchDoc(d);if(S.doc)location.hash="";else renderLibrary();toast("Moved to trash")},true]]);
+  if(d.trashed){sheet(d.name,[["Restore",async()=>{d.trashed=false;await touchDoc(d);renderHome();renderFiles();toast("Document restored")},false,I.restore],
+    ["Delete forever",async()=>{if(await ask("Delete forever?",`“${d.name}” and its ${d.pageOrder.length} pages will be removed from this device.`,"Delete",true))await deleteDocForever(d)},true,I.trash]]);return}
+  const items=[];
+  if(d.pageOrder.length)items.push(["Share",()=>openShare(d),false,I.share],["Save as PDF or image",async()=>{await openDoc(d);openExport()},false,I.save]);
+  items.push(["Rename",()=>renameDoc(d),false,I.edit],["Duplicate",()=>duplicateDoc(d),false,I.copy],
+    ["Move to trash",async()=>{d.trashed=true;await touchDoc(d);if(S.doc===d)go("");else{renderHome();renderFiles()}toast("Moved to trash")},true,I.trash]);
+  sheet(d.name,items);
 }
-async function renameDoc(d){const v=await ask("Rename document","","Save",false,d.name);if(v){d.name=v.slice(0,120);await touchDoc(d);if(S.doc)renderDocHead();else renderLibrary()}}
-async function deleteDocForever(d){const ps=await db.pagesOf(d.id);for(const p of ps)await db.del("pages",p.id);await db.del("docs",d.id);S.docs=S.docs.filter(x=>x!==d);renderLibrary();toast("Deleted")}
+async function renameDoc(d){const v=await ask("Rename document","","Save",false,d.name);if(v){d.name=v.slice(0,120);await touchDoc(d);if(S.doc===d)renderDocHead();renderHome();renderFiles()}}
+async function deleteDocForever(d){const ps=await db.pagesOf(d.id);for(const p of ps)await db.del("pages",p.id);await db.del("docs",d.id);S.docs=S.docs.filter(x=>x!==d);renderHome();renderFiles();toast("Deleted")}
 async function duplicateDoc(d){
-  busy("Duplicating…",0);try{const nd=await createDoc();nd.name=d.name+" (copy)";const ps=await db.pagesOf(d.id);
-    for(const id of d.pageOrder){const p=ps.find(x=>x.id===id);if(!p)continue;const c={...p,id:uid(),docId:nd.id};await savePage(c);nd.pageOrder.push(c.id)}
-    await touchDoc(nd);await computeDocMeta();renderLibrary();toast("Duplicate created")}finally{busy(null)}
+  busy("Duplicating…",0);try{const nd=await createDoc();nd.name=d.name+" (copy)";
+    for(const p of await pagesOf(d)){const c={...p,id:uid(),docId:nd.id};await savePage(c);nd.pageOrder.push(c.id)}
+    await touchDoc(nd);await computeDocMeta();renderHome();renderFiles();toast("Duplicate created")}finally{busy(null)}
 }
 
-/* ================= Document view ================= */
-async function openDocView(d){
-  S.doc=d;$("#libView").hidden=true;$("#docView").hidden=false;$("#exportBtn").hidden=false;$("#scanBtn span").textContent="Scan more";
-  const ps=await db.pagesOf(d.id);S.pages=d.pageOrder.map(id=>ps.find(p=>p.id===id)).filter(Boolean);
-  if(S.pages.length!==d.pageOrder.length){d.pageOrder=S.pages.map(p=>p.id);await touchDoc(d)}
-  renderDoc();
+/* ================= Tools ================= */
+const TOOLS=[
+  ["scan","Smart Scan","Point the camera at a page. It’s found, flattened and cleaned automatically.","c-green"],
+  ["batch","Batch Scan","Scan many pages in a row into one document.","c-cyan"],
+  ["id","ID Card","Scan the front and back of an ID onto one page.","c-amber"],
+  ["import","Import Images","Turn photos from your gallery into clean scans.","c-blue"],
+  ["merge","Merge Docs","Combine several documents into one.","c-violet"],
+  ["fav","Favorites","Documents you starred.","c-pink"],
+  ["trash","Trash","Restore or permanently delete documents.","c-red"],
+];
+const TOOL_IC={};$$(".tools .tool").forEach(b=>{TOOL_IC[b.dataset.act]=b.querySelector(".ic").innerHTML});
+$("#toolList").innerHTML=TOOLS.map(([a,n,t,c])=>`<button class="trow" data-act="${a}"><span class="ic ${c}">${TOOL_IC[a]||""}</span><span><b>${n}</b><span>${t}</span></span></button>`).join("");
+function runTool(a){
+  if(a==="scan")openScanner({mode:"scan",sb:"single"});
+  else if(a==="batch")openScanner({mode:"scan",sb:"batch"});
+  else if(a==="id")openScanner({mode:"id"});
+  else if(a==="import"){S.importTarget=null;pickImages()}
+  else if(a==="merge")openMerge();
+  else if(a==="fav"){go("files");setFilesTab("fav")}
+  else if(a==="trash"){go("files");setFilesTab("trash")}
+  else if(a==="tools")go("tools");
 }
+$$("[data-act]").forEach(b=>b.addEventListener("click",()=>runTool(b.dataset.act)));
+
+/* ================= Merge ================= */
+let mergeSel=[];
+function openMerge(){
+  const list=S.docs.filter(d=>!d.trashed&&d.pageOrder.length).sort((a,b)=>b.updatedAt-a.updatedAt);
+  if(list.length<2){toast("You need at least two documents with pages to merge.");return}
+  mergeSel=[];const box=$("#mergeList");box.innerHTML="";
+  list.forEach(d=>{const l=document.createElement("label");
+    l.innerHTML=`<input type="checkbox">${d._cover?`<img alt="" src="${thumbURL(d._cover)}">`:""}<span>${esc(d.name)}<br><small style="color:var(--muted)">${d.pageOrder.length} pages</small></span><span class="o"></span>`;
+    l.querySelector("input").onchange=e=>{if(e.target.checked)mergeSel.push(d);else mergeSel=mergeSel.filter(x=>x!==d);updateMergeOrder()};
+    l._doc=d;box.appendChild(l)});
+  updateMergeOrder();$("#mergeDlg").showModal();
+}
+function updateMergeOrder(){$$("#mergeList label").forEach(l=>{const i=mergeSel.indexOf(l._doc);l.querySelector(".o").textContent=i>=0?i+1:""});
+  $("#mergeGo").disabled=mergeSel.length<2;$("#mergeGo").textContent=mergeSel.length>=2?`Merge ${mergeSel.length}`:"Merge"}
+$("#mergeClose").onclick=()=>$("#mergeDlg").close();
+$("#mergeGo").onclick=async()=>{
+  $("#mergeDlg").close();busy("Merging…",0);
+  try{const nd=await createDoc("Merged");let i=0;
+    for(const d of mergeSel){for(const p of await pagesOf(d)){const c={...p,id:uid(),docId:nd.id};await savePage(c);nd.pageOrder.push(c.id)}busy("Merging…",++i/mergeSel.length)}
+    await touchDoc(nd);busy(null);toast(`Merged into ${nd.pageOrder.length} pages`);go("doc-"+nd.id)}
+  catch(e){busy(null);toast("The merge didn’t finish. Your documents are unchanged.")}
+};
+
+/* ================= Document view ================= */
+async function openDoc(d){S.doc=d;S.pages=await pagesOf(d);if(S.pages.length!==d.pageOrder.length){d.pageOrder=S.pages.map(p=>p.id);await touchDoc(d)}}
+async function openDocView(d){await openDoc(d);$("#docView").hidden=false;renderDoc()}
 function renderDocHead(){
   const d=S.doc,n=S.pages.length;$("#docName").textContent=d.name;
+  const f=$("#docFav");f.innerHTML=d.favorite?I.star:I.starO;f.classList.toggle("fav",d.favorite);f.setAttribute("aria-pressed",String(d.favorite));
   const warnN=S.pages.filter(p=>p.quality&&p.quality.warnings.length).length;
   $("#docSub").textContent=`${n} ${n===1?"page":"pages"} · ${fmtSize(S.pages.reduce((a,p)=>a+(p.size||0),0))}`+(warnN?` · ${warnN} to review`:"");
-  $("#exportBtn").disabled=n===0;
+  $("#dExport").disabled=n===0;$("#dShare").disabled=n===0;
 }
 function renderDoc(){
-  renderDocHead();const grid=$("#docGrid");grid.innerHTML="";$("#docEmpty").hidden=S.pages.length>0;
+  renderDocHead();const grid=$("#docGrid");grid.innerHTML="";
   S.pages.forEach((p,i)=>{
-    const el=document.createElement("div");el.className="card";
+    const el=document.createElement("div");el.className="pcard";
     const dup=S.pages.findIndex((o,j)=>j<i&&o.hash&&p.hash&&hamming(o.hash,p.hash)<=3);
     const warns=[...(p.quality?p.quality.warnings:[])].map(w=>WARN[w]);if(dup>=0)warns.push(`Looks the same as page ${dup+1}.`);
     const sc=p.quality?p.quality.score:0;
-    el.innerHTML=`<button class="cover" aria-label="Page ${i+1} options"><img alt="" src="${thumbURL(p)}"><span class="q ${qClass(sc)}">${qLabel(sc)} ${sc}</span></button>
-      <div class="cmeta"><b style="color:var(--ink)">Page ${i+1}</b><button class="more" aria-label="Options for page ${i+1}">${ICON_MORE}</button></div>
-      ${warns.length?`<div class="cwarn">${warns.map(esc).join("<br>")}</div>`:""}`;
-    el.querySelector(".cover").onclick=()=>pageMenu(i);el.querySelector(".more").onclick=()=>pageMenu(i);
-    grid.appendChild(el);
+    el.innerHTML=`<button class="pcover" aria-label="Page ${i+1} options"><img alt="" src="${thumbURL(p)}"><span class="num">${i+1}</span><span class="q ${qClass(sc)}">${qLabel(sc)}</span></button>
+      ${warns.length?`<div class="pwarn">${warns.map(esc).join("<br>")}</div>`:""}`;
+    el.querySelector(".pcover").onclick=()=>pageMenu(i);grid.appendChild(el);
   });
+  const add=document.createElement("button");add.className="addpage";add.innerHTML=I.plus+"Add page";add.onclick=()=>openScanner({mode:"scan",sb:"batch",target:S.doc});grid.appendChild(add);
 }
-$("#backBtn").onclick=()=>{location.hash=""};
+$("#backBtn").onclick=()=>{history.length>1&&S.cameFromList?history.back():go("")};
 $("#docName").onclick=()=>renameDoc(S.doc);
+$("#docFav").onclick=async()=>{S.doc.favorite=!S.doc.favorite;await touchDoc(S.doc);renderDocHead()};
+$("#docMore").onclick=()=>docMenu(S.doc);
+$("#dAdd").onclick=()=>openScanner({mode:"scan",sb:"batch",target:S.doc});
+$("#dImport").onclick=()=>{S.importTarget=S.doc;pickImages()};
+$("#dExport").onclick=()=>openExport();
+$("#dShare").onclick=()=>openShare(S.doc);
 async function saveOrder(){S.doc.pageOrder=S.pages.map(p=>p.id);await touchDoc(S.doc);renderDoc()}
 function pageMenu(i){
-  const p=S.pages[i],n=S.pages.length,items=[["Edit crop and look",()=>openEditor(p)],
-    ["Rotate right",async()=>{await reRender(p,x=>{x.rot=(x.rot+1)%4});renderDoc()}],
-    ["Duplicate",async()=>{const c={...p,id:uid(),createdAt:Date.now(),updatedAt:Date.now()};await savePage(c);S.pages.splice(i+1,0,c);await saveOrder();toast("Page duplicated")}]];
-  if(i>0)items.push(["Move earlier",async()=>{[S.pages[i-1],S.pages[i]]=[S.pages[i],S.pages[i-1]];await saveOrder()}]);
-  if(i<n-1)items.push(["Move later",async()=>{[S.pages[i+1],S.pages[i]]=[S.pages[i],S.pages[i+1]];await saveOrder()}]);
-  items.push(["Replace with a new photo",()=>{S.replaceId=p.id;$("#importInput").removeAttribute("multiple");$("#importInput").click()}]);
-  items.push(["Delete page",async()=>{if(await ask(`Delete page ${i+1}?`,"The original photo is removed too.","Delete",true)){await db.del("pages",p.id);S.pages.splice(i,1);await saveOrder();toast("Page deleted")}},true]);
+  const p=S.pages[i],n=S.pages.length,items=[["Edit crop and look",()=>openEditor(p),false,I.edit],
+    ["Rotate right",async()=>{await reRender(p,x=>{x.rot=(x.rot+1)%4});renderDoc()},false,I.rotate],
+    ["Duplicate",async()=>{const c={...p,id:uid(),createdAt:Date.now(),updatedAt:Date.now()};await savePage(c);S.pages.splice(i+1,0,c);await saveOrder();toast("Page duplicated")},false,I.copy]];
+  if(i>0)items.push(["Move earlier",async()=>{[S.pages[i-1],S.pages[i]]=[S.pages[i],S.pages[i-1]];await saveOrder()},false,I.up]);
+  if(i<n-1)items.push(["Move later",async()=>{[S.pages[i+1],S.pages[i]]=[S.pages[i],S.pages[i+1]];await saveOrder()},false,I.down]);
+  items.push(["Replace with another photo",()=>{S.replaceId=p.id;S.importTarget=S.doc;pickImages(true)},false,I.photo]);
+  items.push(["Delete page",async()=>{if(await ask(`Delete page ${i+1}?`,"The original photo is removed too.","Delete",true)){await db.del("pages",p.id);S.pages.splice(i,1);await saveOrder();toast("Page deleted")}},true,I.trash]);
   sheet(`Page ${i+1}`,items);
 }
 async function reRender(p,mutate){
@@ -874,24 +1103,22 @@ async function reRender(p,mutate){
 }
 
 /* ================= Import ================= */
-$("#importBtn").onclick=()=>{S.replaceId=null;$("#importInput").setAttribute("multiple","");$("#importInput").click()};
-$("#importInput").onchange=e=>{const files=[...e.target.files];e.target.value="";importFiles(files)};
-$("#nativeCam").onchange=e=>{const files=[...e.target.files];e.target.value="";importFiles(files)};
-async function ensureDoc(){
-  if(S.doc&&!S.doc.trashed)return S.doc;
-  const d=await createDoc();S.doc=d;S.pages=[];return d;
-}
-async function importFiles(files){
+function pickImages(single){const inp=$("#importInput");if(single)inp.removeAttribute("multiple");else inp.setAttribute("multiple","");inp.click()}
+$("#importInput").onchange=e=>{const files=[...e.target.files];e.target.value="";importFiles(files,S.importTarget)};
+$("#nativeCam").onchange=e=>{const files=[...e.target.files];e.target.value="";importFiles(files,cam.target||null);closeScanner(true)};
+async function importFiles(files,target){
   if(!files.length)return;
   const imgs=files.filter(f=>!f.type||f.type.startsWith("image/"));const skipped=files.length-imgs.length;
   if(!imgs.length){toast("Those files aren’t images. Choose JPG, PNG or another photo format.");return}
   const replaceId=S.replaceId;S.replaceId=null;
-  const d=await ensureDoc();let done=0,failed=0;
+  const d=target&&!target.trashed?target:await createDoc();
+  if(S.doc!==d)await openDoc(d);
+  let done=0,failed=0;
   for(const f of imgs){
     busy(`Processing ${done+failed+1} of ${imgs.length}…`,(done+failed)/imgs.length);await tick();
     try{
       const src=await fileToCanvas(f);const page=await newPageFromCanvas(src,d.id);
-      if(replaceId){const idx=S.pages.findIndex(p=>p.id===replaceId);page.id=uid();await savePage(page);if(idx>=0){await db.del("pages",replaceId);S.pages[idx]=page}else S.pages.push(page)}
+      if(replaceId){const idx=S.pages.findIndex(p=>p.id===replaceId);await savePage(page);if(idx>=0){await db.del("pages",replaceId);S.pages[idx]=page}else S.pages.push(page)}
       else{await savePage(page);S.pages.push(page)}
       d.pageOrder=S.pages.map(p=>p.id);await touchDoc(d);done++;
     }catch(e){failed++}
@@ -899,65 +1126,70 @@ async function importFiles(files){
   busy(null);
   if(failed||skipped)toast(`${done} added. ${failed+skipped} couldn’t be opened as photos. Try JPG or PNG.`);
   else toast(replaceId?"Page replaced":done===1?"Page added":`${done} pages added`);
-  if(location.hash!=="#doc-"+d.id)location.hash="doc-"+d.id;else renderDoc();
+  if(location.hash!=="#doc-"+d.id)go("doc-"+d.id);else renderDoc();
 }
 
 /* ================= Camera scanner ================= */
-const cam={stream:null,track:null,facing:"environment",running:false,raf:0,last:0,quad:null,conf:0,hist:[],armed:true,busy:false,lastCap:0,lastCapQuad:null,lostSince:null,count:0,torch:false};
+const cam={stream:null,track:null,facing:"environment",running:false,raf:0,last:0,quad:null,conf:0,hist:[],armed:true,busy:false,lastCap:0,lastCapQuad:null,lostSince:null,
+  count:0,torch:false,mode:"scan",sb:"single",target:null,doc:null,idSides:[]};
 const video=$("#video"),ov=$("#ov"),ovx=ov.getContext("2d");
-$("#scanBtn").onclick=openScanner;
-async function openScanner(){
-  $("#scanner").classList.add("on");document.body.style.overflow="hidden";
-  cam.count=0;updateScanCount(null);$("#autoBtn").setAttribute("aria-pressed",String(settings.autoCapture));
-  S.scanDocBefore=S.doc&&!S.doc.trashed?S.doc:null;
-  await startCamera();
+function setMode(m){cam.mode=m;$$("[data-mode]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.mode===m)));
+  $("#sbSeg").hidden=m!=="scan";$("#idFrame").hidden=m!=="id";cam.idSides=[];updateScanCount(null)}
+function setSB(v){cam.sb=v;$$("[data-sb]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.sb===v)))}
+$$("[data-mode]").forEach(b=>b.onclick=()=>{if(cam.count&&b.dataset.mode!==cam.mode){toast("Finish this scan first: tap the thumbnail to save it.");return}setMode(b.dataset.mode)});
+$$("[data-sb]").forEach(b=>b.onclick=()=>setSB(b.dataset.sb));
+async function openScanner(opt){
+  opt=opt||{};cam.target=opt.target||null;cam.doc=cam.target;cam.count=0;cam.idSides=[];
+  setSB(opt.sb||"single");setMode(opt.mode||"scan");
+  $("#scanner").classList.add("on");
+  $("#autoBtn").classList.toggle("on",settings.autoCapture);$("#autoBtn").setAttribute("aria-pressed",String(settings.autoCapture));
+  updateScanCount(null);await startCamera();
 }
-function scanError(title,text){
-  stopCamera();$("#scErr").hidden=false;$("#scErrTitle").textContent=title;$("#scErrText").textContent=text;$("#pill").hidden=true;
-}
+function scanError(title,text){stopCamera();$("#scErr").hidden=false;$("#scErrTitle").textContent=title;$("#scErrText").textContent=text;$("#pill").hidden=true}
 async function startCamera(){
   $("#scErr").hidden=true;$("#pill").hidden=false;setPill("Starting camera…");
   if(!window.isSecureContext||!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
     scanError("Camera unavailable","This view can’t open the camera directly. You can still take a photo with your phone’s camera app or import images.");return}
-  try{
-    cam.stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:cam.facing},width:{ideal:1920},height:{ideal:1080},frameRate:{ideal:20,max:30}}});
-  }catch(e){
-    const n=e&&e.name;
-    if(n==="NotAllowedError"||n==="SecurityError")scanError("Camera permission is off","Allow camera access for this site in your browser’s settings (the icon next to the address bar), then try again. Or use the phone’s camera app instead.");
+  try{cam.stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:cam.facing},width:{ideal:1920},height:{ideal:1080},frameRate:{ideal:20,max:30}}})}
+  catch(e){const n=e&&e.name;
+    if(n==="NotAllowedError"||n==="SecurityError")scanError("Camera permission is off","Allow camera access for this site in your browser’s settings, then try again. Or use the phone’s camera app instead.");
     else if(n==="NotFoundError"||n==="OverconstrainedError")scanError("No camera found","This device doesn’t have a camera this page can use. Import images instead.");
     else scanError("Camera unavailable","The camera couldn’t start. Another app may be using it. Close it and try again, or import images.");
-    return;
-  }
-  cam.track=cam.stream.getVideoTracks()[0];video.srcObject=cam.stream;
-  try{await video.play()}catch(e){}
-  const caps=cam.track.getCapabilities?cam.track.getCapabilities():{};$("#torchBtn").hidden=!caps.torch;cam.torch=false;$("#torchBtn").setAttribute("aria-pressed","false");
+    return}
+  cam.track=cam.stream.getVideoTracks()[0];video.srcObject=cam.stream;try{await video.play()}catch(e){}
+  const caps=cam.track.getCapabilities?cam.track.getCapabilities():{};$("#torchBtn").hidden=!caps.torch;cam.torch=false;$("#torchBtn").classList.remove("on");
   cam.track.onended=()=>{if(cam.running)scanError("Camera stopped","The camera was interrupted. Your scanned pages are saved.")};
   cam.running=true;cam.hist=[];cam.quad=null;cam.armed=true;cam.raf=requestAnimationFrame(loop);
 }
 function stopCamera(){cam.running=false;cancelAnimationFrame(cam.raf);if(cam.stream)cam.stream.getTracks().forEach(t=>t.stop());cam.stream=null;cam.track=null;video.srcObject=null}
-async function closeScanner(){
-  stopCamera();$("#scanner").classList.remove("on");document.body.style.overflow="";
-  if(S.doc&&cam.count>0){if(location.hash!=="#doc-"+S.doc.id)location.hash="doc-"+S.doc.id;else renderDoc()}
-  else if(S.doc&&!S.scanDocBefore&&!S.doc.pageOrder.length){/* nothing scanned */S.doc=null}
+async function closeScanner(silent){
+  stopCamera();$("#scanner").classList.remove("on");
+  if(silent)return;
+  if(cam.mode==="id"&&cam.idSides.length){await finishId();return}
+  if(cam.doc&&cam.count>0){if(location.hash!=="#doc-"+cam.doc.id)go("doc-"+cam.doc.id);else{await openDoc(cam.doc);renderDoc()}}
 }
-$("#scClose").onclick=closeScanner;$("#scDone").onclick=closeScanner;
-$("#scNative").onclick=()=>{$("#nativeCam").click()};
-$("#scImport").onclick=()=>{closeScanner();$("#importInput").setAttribute("multiple","");$("#importInput").click()};
-$("#scGallery").onclick=()=>{$("#importInput").setAttribute("multiple","");stopCamera();$("#scanner").classList.remove("on");document.body.style.overflow="";$("#importInput").click()};
+$("#scClose").onclick=async()=>{
+  if(cam.mode==="id"&&cam.idSides.length===1){stopCamera();$("#scanner").classList.remove("on");
+    if(await ask("Save the front only?","You scanned one side of the ID. Save it as a page, or discard it.","Save front")){await finishId()}else cam.idSides=[];return}
+  closeScanner()};
+$("#scDone").onclick=()=>closeScanner();
+$("#scNative").onclick=()=>$("#nativeCam").click();
+$("#scImport").onclick=()=>{S.importTarget=cam.target;closeScanner(true);pickImages()};
+$("#scGallery").onclick=()=>{S.importTarget=cam.doc||cam.target;closeScanner(true);pickImages()};
 $("#flipBtn").onclick=async()=>{cam.facing=cam.facing==="environment"?"user":"environment";stopCamera();await startCamera()};
-$("#torchBtn").onclick=async()=>{if(!cam.track)return;cam.torch=!cam.torch;try{await cam.track.applyConstraints({advanced:[{torch:cam.torch}]});$("#torchBtn").setAttribute("aria-pressed",String(cam.torch))}catch(e){cam.torch=false;toast("Flash isn’t available on this camera.")}};
-$("#autoBtn").onclick=()=>{settings.autoCapture=!settings.autoCapture;saveSettings();$("#autoBtn").setAttribute("aria-pressed",String(settings.autoCapture));toast(settings.autoCapture?"Auto capture on":"Auto capture off. Tap the shutter to scan.")};
+$("#torchBtn").onclick=async()=>{if(!cam.track)return;cam.torch=!cam.torch;try{await cam.track.applyConstraints({advanced:[{torch:cam.torch}]});$("#torchBtn").classList.toggle("on",cam.torch);$("#torchBtn").setAttribute("aria-pressed",String(cam.torch))}catch(e){cam.torch=false;toast("Flash isn’t available on this camera.")}};
+$("#autoBtn").onclick=()=>{settings.autoCapture=!settings.autoCapture;saveSettings();$("#autoBtn").classList.toggle("on",settings.autoCapture);$("#autoBtn").setAttribute("aria-pressed",String(settings.autoCapture));
+  toast(settings.autoCapture?"Auto capture on":"Auto capture off. Tap the shutter to scan.")};
 $("#shutter").onclick=()=>{if(cam.running&&!cam.busy)capture()};
 document.addEventListener("visibilitychange",()=>{
   if(!$("#scanner").classList.contains("on"))return;
-  if(document.hidden){stopCamera()}else if(!cam.running&&$("#scErr").hidden){startCamera()}
+  if(document.hidden)stopCamera();else if(!cam.running&&$("#scErr").hidden)startCamera();
 });
 function setPill(t){const p=$("#pill");if(p.textContent!==t)p.textContent=t}
 function updateScanCount(thumbBlob){
-  const total=S.doc?S.doc.pageOrder.length:0;
-  $("#scCount").textContent=cam.count?`${cam.count} scanned this session`:(total?`${total} pages in document`:"New document");
-  $("#doneLabel").textContent=cam.count?`Done (${cam.count})`:"Done";
-  const im=$("#lastThumb");if(thumbBlob){if(im.src)URL.revokeObjectURL(im.src);im.src=URL.createObjectURL(thumbBlob);im.hidden=false}else if(!cam.count)im.hidden=true;
+  const n=cam.mode==="id"?cam.idSides.length:cam.count;
+  $("#scDone").hidden=!n;$("#doneCount").textContent=cam.mode==="id"?`${n}/2`:n;
+  const im=$("#lastThumb");if(thumbBlob){if(im.src)URL.revokeObjectURL(im.src);im.src=URL.createObjectURL(thumbBlob)}
 }
 function loop(ts){
   if(!cam.running)return;cam.raf=requestAnimationFrame(loop);
@@ -976,9 +1208,10 @@ function loop(ts){
     if(cam.lastCapQuad&&cam.quad.some((p,i)=>Math.hypot(p.x-cam.lastCapQuad[i].x,p.y-cam.lastCapQuad[i].y)>.06))cam.armed=true;
     state=r.mean<55?"dark":cam.conf<cfg.conf?"detected":!stable?"unstable":r.lap<cfg.blur?"blurry":"ready";
   }
+  const idHint=cam.mode==="id"?(cam.idSides.length?"Now the back of the ID":"Front of the ID inside the frame"):null;
   if(cam.busy)setPill("Processing your scan.");
-  else if(!cam.armed&&state!=="none")setPill("Saved. Turn to the next page.");
-  else setPill({none:"Position your document inside the frame.",dark:"Move to a brighter area.",detected:"Document detected.",unstable:"Hold your camera steady.",
+  else if(!cam.armed&&state!=="none")setPill(cam.mode==="id"?"Saved. Turn the card over.":"Saved. Turn to the next page.");
+  else setPill(state==="none"&&idHint?idHint:{none:"Position your document inside the frame.",dark:"Move to a brighter area.",detected:"Document detected.",unstable:"Hold your camera steady.",
     blurry:"Waiting for camera focus.",ready:settings.autoCapture?"Capturing document.":"Ready. Tap the shutter."}[state]);
   drawOverlay(vw,vh,state);
   if(state==="ready"&&settings.autoCapture&&cam.armed&&!cam.busy&&now-cam.lastCap>1500)capture();
@@ -987,11 +1220,15 @@ function drawOverlay(vw,vh,state){
   const cw=ov.clientWidth,ch=ov.clientHeight,dpr=Math.min(2,devicePixelRatio||1);
   if(ov.width!==Math.round(cw*dpr)||ov.height!==Math.round(ch*dpr)){ov.width=Math.round(cw*dpr);ov.height=Math.round(ch*dpr)}
   ovx.setTransform(dpr,0,0,dpr,0,0);ovx.clearRect(0,0,cw,ch);if(!cam.quad)return;
-  const s=Math.min(cw/vw,ch/vh),ox=(cw-vw*s)/2,oy=(ch-vh*s)/2,pts=cam.quad.map(p=>[ox+p.x*vw*s,oy+p.y*vh*s]);
+  const s=Math.max(cw/vw,ch/vh),ox=(cw-vw*s)/2,oy=(ch-vh*s)/2,pts=cam.quad.map(p=>[ox+p.x*vw*s,oy+p.y*vh*s]);
   const col=state==="ready"?"#5BE39B":"#8EA2FF";
   ovx.beginPath();pts.forEach(([x,y],i)=>i?ovx.lineTo(x,y):ovx.moveTo(x,y));ovx.closePath();
   ovx.fillStyle=state==="ready"?"rgba(91,227,155,.18)":"rgba(142,162,255,.16)";ovx.fill();ovx.lineWidth=3;ovx.strokeStyle=col;ovx.stroke();
   pts.forEach(([x,y])=>{ovx.beginPath();ovx.arc(x,y,7,0,Math.PI*2);ovx.fillStyle="#fff";ovx.fill();ovx.lineWidth=3;ovx.strokeStyle=col;ovx.stroke()});
+}
+async function camDoc(prefix){
+  if(cam.doc&&!cam.doc.trashed){if(S.doc!==cam.doc)await openDoc(cam.doc);return cam.doc}
+  cam.doc=await createDoc(prefix);S.doc=cam.doc;S.pages=[];return cam.doc;
 }
 async function capture(){
   if(!cam.running||cam.busy)return;cam.busy=true;
@@ -999,15 +1236,106 @@ async function capture(){
   try{
     const vw=video.videoWidth,vh=video.videoHeight,c=mk(vw,vh);c.getContext("2d").drawImage(video,0,0,vw,vh);
     const det=cam.quad&&cam.conf>=.45?{quad:cam.quad.map(p=>({...p})),conf:cam.conf}:{quad:defaultQuadN(),conf:0};
-    const d=await ensureDoc();await tick();
+    if(cam.mode==="id"){
+      await tick();const page=await newPageFromCanvas(c,"tmp",det);cam.idSides.push(await blobToCanvas(page.processed));
+      updateScanCount(page.thumb);cam.lastCapQuad=cam.quad?cam.quad.map(p=>({...p})):null;cam.armed=false;cam.lastCap=performance.now();cam.hist=[];cam.busy=false;
+      if(cam.idSides.length>=2)closeScanner();return;
+    }
+    const d=await camDoc();await tick();
     const page=await newPageFromCanvas(c,d.id,det);await savePage(page);
     S.pages.push(page);d.pageOrder=S.pages.map(p=>p.id);await touchDoc(d);
     cam.count++;updateScanCount(page.thumb);
     if(page.quality.warnings.length)toast(WARN[page.quality.warnings[0]]);
     cam.lastCapQuad=cam.quad?cam.quad.map(p=>({...p})):null;cam.armed=false;cam.lastCap=performance.now();cam.hist=[];
+    if(cam.sb==="single"){cam.busy=false;await closeScanner();openEditor(page);return}
   }catch(e){toast("That capture couldn’t be saved. Your earlier pages are safe.")}
   cam.busy=false;
 }
+// Places the ID sides at real card size (85.6 × 54 mm) on one A4 page, like a photocopy.
+async function finishId(){
+  const sides=cam.idSides;cam.idSides=[];if(!sides.length)return;
+  busy("Making the ID page…",.5);
+  try{
+    const dpi=200,mm=v=>Math.round(v/25.4*dpi),W=mm(210),H=mm(297),c=mk(W,H),x=c.getContext("2d");
+    x.fillStyle="#fff";x.fillRect(0,0,W,H);x.imageSmoothingQuality="high";
+    sides.forEach((s,i)=>{
+      let src=s;if(s.height>s.width)src=rotate(s,1);
+      const bw=mm(85.6*1.15),k=bw/src.width,bh=src.height*k,cx=W/2,cy=sides.length===1?H*.3:(i===0?H*.27:H*.62);
+      x.drawImage(src,cx-bw/2,cy-bh/2,bw,bh);x.strokeStyle="#C8CDD0";x.lineWidth=2;x.strokeRect(cx-bw/2,cy-bh/2,bw,bh);
+    });
+    const d=await camDoc("ID Card");
+    const page={id:uid(),docId:d.id,createdAt:Date.now(),quad:fullQuadN(),autoQuad:fullQuadN(),conf:1,rot:0,profile:"none",
+      adj:{brightness:0,contrast:0,sharpen:false},srcW:W,srcH:H,skewMode:"manual",skew:0,tidy:false};
+    page.original=await canvasToBlob(c,"image/jpeg",.92);await renderPage(page,c);await savePage(page);
+    S.pages.push(page);d.pageOrder=S.pages.map(p=>p.id);await touchDoc(d);busy(null);
+    toast(sides.length===2?"ID card saved, front and back on one page":"ID card front saved");go("doc-"+d.id);
+    if(location.hash==="#doc-"+d.id)renderDoc();
+  }catch(e){busy(null);toast("The ID page couldn’t be made. Try scanning again.")}
+}
+
+/* ================= Share ================= */
+let shareFmt="pdf",shareDocRef=null,shareReady=null;
+const SHAREQ={small:{dpi:150,quality:.72},normal:{dpi:200,quality:.82},high:{dpi:300,quality:.9}};
+function canShareFiles(){try{return !!(navigator.share&&navigator.canShare&&navigator.canShare({files:[new File([new Blob(["x"])],"t.pdf",{type:"application/pdf"})]}))}catch(e){return false}}
+async function openShare(d){
+  shareDocRef=d;shareReady=null;setShareFmt("pdf");
+  $("#shareStatus").textContent="";
+  $("#shareInfo").textContent=canShareFiles()?`“${d.name}” · ${d.pageOrder.length} ${d.pageOrder.length===1?"page":"pages"}. Your phone’s share menu opens next, where you can pick Gmail, Messenger or any other app.`
+    :`“${d.name}” · ${d.pageOrder.length} ${d.pageOrder.length===1?"page":"pages"}. This browser can’t open the share menu, so the file will be saved instead and you can attach it from there.`;
+  $("#shareDlg").showModal();
+}
+function setShareFmt(f){shareFmt=f;shareReady=null;$$("[data-sf]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.sf===f)));$("#shareGo").textContent="Prepare";$("#shareGo").disabled=false}
+$$("[data-sf]").forEach(b=>b.onclick=()=>setShareFmt(b.dataset.sf));
+$("#shareClose").onclick=()=>$("#shareDlg").close();
+$("#shareGo").onclick=async()=>{
+  const st=$("#shareStatus"),btn=$("#shareGo");
+  if(shareReady){
+    const {files,name,blob}=shareReady;
+    if(canShareFiles()&&navigator.canShare({files})){
+      try{await navigator.share({files,title:name});st.textContent="Shared.";$("#shareDlg").close();toast("Shared")}
+      catch(e){if(e&&e.name==="AbortError")st.textContent="Share cancelled. Tap Share to try again.";else{st.textContent="The share menu couldn’t open, so the file was saved instead.";await saveFile(name,blob,st)}}
+    }else await saveFile(name,blob,st);
+    return;
+  }
+  btn.disabled=true;
+  try{
+    const pages=S.doc===shareDocRef?S.pages:await pagesOf(shareDocRef);
+    const q=SHAREQ[settings.shareQ]||SHAREQ.normal;
+    const set={fmt:shareFmt,paper:settings.paper,orient:"auto",margin:0,dpi:q.dpi,quality:q.quality,gray:false,nums:false,cw:210,ch:297};
+    const base=safeName(shareDocRef.name);
+    const out=await buildOutput(pages,[...pages.keys()],set,base,t=>{st.textContent=t},true);
+    const files=out.parts.map(p=>new File([p.blob],p.name,{type:p.blob.type||(shareFmt==="pdf"?"application/pdf":"image/jpeg")}));
+    shareReady={files,name:out.name,blob:out.file};
+    const total=out.parts.reduce((a,p)=>a+p.blob.size,0);
+    st.textContent=`Ready: ${files.length===1?files[0].name:files.length+" images"} (${fmtSize(total)}).`;
+    btn.textContent=canShareFiles()?"Share":"Save file";
+  }catch(e){st.textContent=e&&e.message==="nopdf"?"The PDF tool didn’t load. Check your connection and reload the page.":"The file couldn’t be prepared. Try Images, or a smaller size in Me → Quality when sharing."}
+  btn.disabled=false;
+};
+const safeName=s=>(s||"Scan").replace(/[\\/:*?"<>|]+/g,"-").replace(/\.(pdf|jpg|png|zip)$/i,"").trim().slice(0,120)||"Scan";
+
+/* ================= Me (settings) ================= */
+$("#sProfile").innerHTML=PROFILES.map(([id,n])=>`<option value="${id}">${n}</option>`).join("");
+function loadMe(){$("#sAuto").checked=settings.autoCapture;$("#sStraight").checked=settings.autoStraighten;$("#sTidy").checked=settings.tidy;
+  $("#sSens").value=settings.sens;$("#sProfile").value=settings.profile;$("#sPaper").value=settings.paper;$("#sShareQ").value=settings.shareQ||"normal";updateStorage()}
+async function updateStorage(){
+  let t="Documents are saved in this browser only. Clearing your browser data removes them, so share or save anything you need to keep.";
+  try{if(navigator.storage&&navigator.storage.estimate){const e=await navigator.storage.estimate();t=`Using ${fmtSize(e.usage||0)} on this device. `+t}}catch(e){}
+  if(store.mem)t="Saving isn’t available in this view, so documents disappear when you close the page. Share or save them before leaving.";
+  $("#sStorage").textContent=t;
+}
+$("#sAuto").onchange=e=>{settings.autoCapture=e.target.checked;saveSettings()};
+$("#sStraight").onchange=e=>{settings.autoStraighten=e.target.checked;saveSettings()};
+$("#sTidy").onchange=e=>{settings.tidy=e.target.checked;saveSettings()};
+$("#sSens").onchange=e=>{settings.sens=e.target.value;saveSettings()};
+$("#sProfile").onchange=e=>{settings.profile=e.target.value;saveSettings()};
+$("#sPaper").onchange=e=>{settings.paper=e.target.value;saveSettings()};
+$("#sShareQ").onchange=e=>{settings.shareQ=e.target.value;saveSettings()};
+$("#sPersist").onclick=async()=>{try{const ok=navigator.storage&&navigator.storage.persist?await navigator.storage.persist():false;
+  toast(ok?"Your browser will keep these documents unless you clear site data.":"The browser didn’t agree to keep them permanently. Save important documents.")}catch(e){toast("This browser doesn’t support that option.")}};
+$("#sWipe").onclick=async()=>{if(!await ask("Delete everything?","All documents and original photos on this device will be removed. This can’t be undone.","Delete everything",true))return;
+  busy("Deleting…",.5);try{for(const p of await db.all("pages"))await db.del("pages",p.id);for(const d of await db.all("docs"))await db.del("docs",d.id);S.docs=[];S.doc=null}finally{busy(null)}
+  updateStorage();toast("All documents deleted")};
 
 /* ================= Editor ================= */
 const ed=$("#editor"),stage=$("#stage"),cropWrap=$("#cropWrap"),adjWrap=$("#adjWrap"),cropCanvas=$("#cropCanvas"),outCanvas=$("#outCanvas"),loupe=$("#loupe");
@@ -1118,7 +1446,6 @@ $("#saveBtn").onclick=async()=>{
 
 /* ================= Export ================= */
 let exFmt="pdf";
-$("#exportBtn").onclick=openExport;
 function openExport(){
   if(!S.doc||!S.pages.length)return;
   $("#exName").value=S.doc.name;$("#exPages").value="";$("#exPaper").value=settings.paper;$("#exStatus").textContent="";
@@ -1167,35 +1494,39 @@ async function pageImage(p,set,maxW,maxH){
   if(maxW&&maxH){const k=Math.min(1,maxW/c.width,maxH/c.height);if(k<1)c=scaled(c,Math.max(c.width,c.height)*k)}
   if(set.gray)grayscale(c);return c;
 }
+// Builds the output. parts = individual files (one PDF, or one image per page); file/name = single download (images zipped when several).
+async function buildOutput(pages,idx,set,base,progress,keepParts){
+  if(set.fmt==="pdf"){
+    const lib=window.jspdf&&window.jspdf.jsPDF;if(!lib)throw new Error("nopdf");
+    let doc=null;
+    for(let n=0;n<idx.length;n++){const p=pages[idx[n]];progress(`Adding page ${n+1} of ${idx.length}…`);await tick();
+      const L=pageLayout(p.procW,p.procH,set),c=await pageImage(p,set,L.w/25.4*set.dpi,L.h/25.4*set.dpi),o=L.pw>L.ph?"l":"p";
+      if(!doc)doc=new lib({unit:"mm",format:[L.pw,L.ph],orientation:o,compress:true});else doc.addPage([L.pw,L.ph],o);
+      doc.addImage(c.toDataURL("image/jpeg",set.quality),"JPEG",L.x,L.y,L.w,L.h,undefined,"FAST");
+      if(set.nums){doc.setFontSize(9);doc.setTextColor(90);doc.text(`${n+1} / ${idx.length}`,L.pw/2,L.ph-Math.max(3,set.margin/2.5),{align:"center"})}
+    }
+    const file=new Blob([doc.output("blob")],{type:"application/pdf"}),name=base+".pdf";
+    return {file,name,parts:[{name,blob:file}]};
+  }
+  const type=set.fmt==="png"?"image/png":"image/jpeg",ext=set.fmt,outs=[];
+  for(let n=0;n<idx.length;n++){const p=pages[idx[n]];progress(`Rendering page ${n+1} of ${idx.length}…`);await tick();
+    let c;const L=pageLayout(p.procW,p.procH,set);
+    if(set.paper==="original"&&!set.margin)c=await pageImage(p,set,keepParts?L.w/25.4*set.dpi:0,keepParts?L.h/25.4*set.dpi:0);
+    else{const px=v=>Math.round(v/25.4*set.dpi);c=mk(px(L.pw),px(L.ph));const x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);
+      x.imageSmoothingQuality="high";x.drawImage(await pageImage(p,set),px(L.x),px(L.y),px(L.w),px(L.h))}
+    outs.push({name:`${base}${idx.length>1?"-"+String(idx[n]+1).padStart(2,"0"):""}.${ext}`,blob:await canvasToBlob(c,type,set.quality)});
+  }
+  if(outs.length===1)return {file:outs[0].blob,name:outs[0].name,parts:outs};
+  progress("Packing ZIP file…");await tick();
+  return {file:await makeZip(outs),name:base+"-"+ext+".zip",parts:outs};
+}
 $("#exGo").onclick=async()=>{
   const set=exportSettings(),idx=parsePages($("#exPages").value,S.pages.length),st=$("#exStatus"),btn=$("#exGo");if(!idx)return;
-  const base=($("#exName").value.trim()||"Scan").replace(/[\\/:*?"<>|]+/g,"-").replace(/\.(pdf|jpg|png|zip)$/i,"").slice(0,120);
-  btn.disabled=true;let file,name;
-  try{
-    if(set.fmt==="pdf"){
-      const lib=window.jspdf&&window.jspdf.jsPDF;if(!lib){st.textContent="The PDF tool didn’t load. Check your connection and reload the page.";btn.disabled=false;return}
-      let doc=null;
-      for(let n=0;n<idx.length;n++){const p=S.pages[idx[n]];st.textContent=`Adding page ${n+1} of ${idx.length}…`;await tick();
-        const L=pageLayout(p.procW,p.procH,set),c=await pageImage(p,set,L.w/25.4*set.dpi,L.h/25.4*set.dpi),o=L.pw>L.ph?"l":"p";
-        if(!doc)doc=new lib({unit:"mm",format:[L.pw,L.ph],orientation:o,compress:true});else doc.addPage([L.pw,L.ph],o);
-        doc.addImage(c.toDataURL("image/jpeg",set.quality),"JPEG",L.x,L.y,L.w,L.h,undefined,"FAST");
-        if(set.nums){doc.setFontSize(9);doc.setTextColor(90);doc.text(`${n+1} / ${idx.length}`,L.pw/2,L.ph-Math.max(3,set.margin/2.5),{align:"center"})}
-      }
-      file=doc.output("blob");name=base+".pdf";
-    }else{
-      const type=set.fmt==="png"?"image/png":"image/jpeg",ext=set.fmt,outs=[];
-      for(let n=0;n<idx.length;n++){const p=S.pages[idx[n]];st.textContent=`Rendering page ${n+1} of ${idx.length}…`;await tick();
-        let c;const L=pageLayout(p.procW,p.procH,set);
-        if(set.paper==="original"&&!set.margin)c=await pageImage(p,set);
-        else{const px=v=>Math.round(v/25.4*set.dpi);c=mk(px(L.pw),px(L.ph));const x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);
-          x.imageSmoothingQuality="high";x.drawImage(await pageImage(p,set),px(L.x),px(L.y),px(L.w),px(L.h))}
-        outs.push({name:`${base}${idx.length>1?"-"+String(idx[n]+1).padStart(2,"0"):""}.${ext}`,blob:await canvasToBlob(c,type,set.quality)});
-      }
-      if(outs.length===1){file=outs[0].blob;name=outs[0].name}
-      else{st.textContent="Packing ZIP file…";await tick();file=await makeZip(outs);name=base+"-"+ext+".zip"}
-    }
-  }catch(e){st.textContent="The export didn’t finish. Your document is unchanged. Try fewer pages or a lower resolution.";btn.disabled=false;return}
-  st.textContent=`Ready: ${name} (${fmtSize(file.size)})`;await saveFile(name,file,st);btn.disabled=false;
+  const base=safeName($("#exName").value.trim()||"Scan");
+  btn.disabled=true;let out;
+  try{out=await buildOutput(S.pages,idx,set,base,t=>{st.textContent=t},false)}
+  catch(e){st.textContent=e&&e.message==="nopdf"?"The PDF tool didn’t load. Check your connection and reload the page.":"The export didn’t finish. Your document is unchanged. Try fewer pages or a lower resolution.";btn.disabled=false;return}
+  st.textContent=`Ready: ${out.name} (${fmtSize(out.file.size)})`;await saveFile(out.name,out.file,st);btn.disabled=false;
 };
 async function saveFile(name,blob,st){
   try{
@@ -1203,6 +1534,7 @@ async function saveFile(name,blob,st){
     else{const a=document.createElement("a"),u=URL.createObjectURL(blob);a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),5000);st.textContent=`Saved ${name}.`}
   }catch(e){const c=e&&e.code;st.textContent=c==="declined"?"Download cancelled.":c==="rate_limited"?"A save prompt is already open. Finish that one first.":c==="too_large"?"That file is too large here. Try a lower resolution or fewer pages.":"This view can’t save files. Open the page in your browser and try again."}
 }
+
 // Minimal ZIP (stored, no compression; images are already compressed)
 const CRC=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
 function crc32(u){let c=0xFFFFFFFF;for(let i=0;i<u.length;i++)c=CRC[(c^u[i])&255]^(c>>>8);return (c^0xFFFFFFFF)>>>0}
@@ -1223,21 +1555,6 @@ async function makeZip(files){
   e.setUint32(0,0x06054b50,true);e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);e.setUint32(12,csize,true);e.setUint32(16,offset,true);
   return new Blob([...parts,...central,e.buffer],{type:"application/zip"});
 }
-
-/* ================= Settings dialog ================= */
-$("#sProfile").innerHTML=PROFILES.map(([id,n])=>`<option value="${id}">${n}</option>`).join("");
-$("#settingsBtn").onclick=()=>{$("#sAuto").checked=settings.autoCapture;$("#sStraight").checked=settings.autoStraighten;$("#sTidy").checked=settings.tidy;$("#sSens").value=settings.sens;$("#sProfile").value=settings.profile;$("#sPaper").value=settings.paper;updateFoot();$("#setDlg").showModal()};
-$("#sAuto").onchange=e=>{settings.autoCapture=e.target.checked;saveSettings()};
-$("#sStraight").onchange=e=>{settings.autoStraighten=e.target.checked;saveSettings()};
-$("#sTidy").onchange=e=>{settings.tidy=e.target.checked;saveSettings()};
-$("#sSens").onchange=e=>{settings.sens=e.target.value;saveSettings()};
-$("#sProfile").onchange=e=>{settings.profile=e.target.value;saveSettings()};
-$("#sPaper").onchange=e=>{settings.paper=e.target.value;saveSettings()};
-$("#sPersist").onclick=async()=>{try{const ok=navigator.storage&&navigator.storage.persist?await navigator.storage.persist():false;
-  toast(ok?"Your browser will keep these documents unless you clear site data.":"The browser didn’t agree to keep them permanently. Export important documents.")}catch(e){toast("This browser doesn’t support that option.")}};
-$("#sWipe").onclick=async()=>{if(!await ask("Delete everything?","All documents and original photos on this device will be removed. This can’t be undone.","Delete everything",true))return;
-  busy("Deleting…",.5);try{for(const p of await db.all("pages"))await db.del("pages",p.id);for(const d of await db.all("docs"))await db.del("docs",d.id);S.docs=[];S.doc=null}finally{busy(null)}
-  $("#setDlg").close();location.hash="";showLibrary();toast("All documents deleted")};
 
 /* ================= Boot ================= */
 let downloads=null;
