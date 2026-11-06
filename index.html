@@ -125,7 +125,7 @@ select{min-height:44px;padding:8px 10px;border-radius:12px;border:1px solid var(
 .topbar .ttl{flex:1;min-width:0;background:transparent;border:0;text-align:left;font-size:19px;font-weight:700;padding:8px 6px;border-radius:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .topbar .iconbtn{color:var(--ink)}
 .docsub{padding:0 18px 8px;color:var(--muted);font-size:14px}
-.docbody{flex:1;overflow-y:auto;padding:6px 16px 20px}
+.docbody{flex:1;overflow-y:auto;padding:6px 16px 24px}
 .pgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px 14px}
 @media (min-width:480px){.pgrid{grid-template-columns:repeat(3,1fr)}}
 .pcard{display:flex;flex-direction:column;gap:6px;min-width:0}
@@ -142,6 +142,21 @@ select{min-height:44px;padding:8px 10px;border-radius:12px;border:1px solid var(
 .dockbar button svg{width:24px;height:24px}
 .dockbar button.hl{color:var(--accent)}
 .dockbar button:disabled{opacity:.4}
+
+.pview{display:flex;flex-direction:column;gap:18px;margin:0 -10px}
+.vpage{margin:0;display:flex;flex-direction:column;gap:6px}
+.vimg{padding:0;border:0;background:#fff;display:block;width:100%;border-radius:4px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.45)}
+.vimg img{display:block;width:100%;height:auto}
+.vpage figcaption{display:flex;align-items:center;gap:10px;padding:0 4px;color:var(--muted);font-size:14px;font-weight:600}
+.vpage figcaption .pwarn{flex:1;font-weight:500}
+.vpage figcaption .iconbtn{margin-left:auto}
+.addpage.wide{aspect-ratio:auto;min-height:90px;flex-direction:row}
+.etools{display:grid;grid-template-columns:repeat(4,1fr) 64px;gap:4px;align-items:center}
+.et{background:transparent;border:0;color:var(--stage-ink);display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12.5px;font-weight:600;padding:6px 0;border-radius:12px;min-height:56px;justify-content:center}
+.et svg{width:24px;height:24px}
+.et[aria-pressed="true"]{color:var(--accent)}
+.et.ok{background:var(--accent);color:var(--accent-ink);width:56px;height:48px;min-height:0;justify-self:end}
+.adjpanel{display:flex;flex-direction:column;gap:10px;background:var(--stage-2);border-radius:14px;padding:12px}
 
 /* ---------- Dialogs as bottom sheets ---------- */
 dialog{border:0;padding:0;background:var(--panel);color:var(--ink);width:100%;max-width:600px;max-height:88vh;margin:auto auto 0;border-radius:22px 22px 0 0;
@@ -236,7 +251,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .handle::after{content:"";width:20px;height:20px;border-radius:50%;background:#fff;border:4px solid var(--guide);box-shadow:0 1px 6px rgba(0,0,0,.5)}
 .handle.active::after{transform:scale(1.25)}
 .loupe{position:absolute;top:12px;width:120px;height:120px;border-radius:50%;border:3px solid #fff;box-shadow:0 4px 18px rgba(0,0,0,.6);display:none;pointer-events:none;background:#000}
-.ed-bottom{padding:8px 12px calc(14px + var(--safe-b));display:flex;flex-direction:column;gap:12px;max-width:600px;width:100%;margin:0 auto}
+.ed-bottom{padding:6px 10px calc(10px + var(--safe-b));display:flex;flex-direction:column;gap:10px;max-width:600px;width:100%;margin:0 auto}
 .erow{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
 .dbtn{background:var(--stage-2);border:1px solid #2E3840;color:var(--stage-ink);border-radius:12px;padding:10px 13px;font-weight:700;min-height:46px;display:inline-flex;align-items:center;gap:7px}
 .dbtn svg{width:19px;height:19px}
@@ -348,6 +363,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
   <div class="topbar">
     <button class="iconbtn" id="backBtn" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="m15 6-6 6 6 6"/></svg></button>
     <button class="ttl" id="docName" aria-label="Rename document"></button>
+    <button class="iconbtn" id="docViewMode" aria-label="Show pages as a grid"></button>
     <button class="iconbtn" id="docFav" aria-label="Favorite" aria-pressed="false"></button>
     <button class="iconbtn" id="docMore" aria-label="More options"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></button>
   </div>
@@ -439,20 +455,23 @@ input[type=range]{width:100%;accent-color:var(--accent)}
   </div>
   <div class="ed-bottom" id="adjBar" hidden>
     <div class="qline" id="qline"></div>
-    <div class="filters" id="filters" role="group" aria-label="Look"></div>
-    <div class="sliders">
-      <label for="brightness">Brightness</label><input type="range" id="brightness" min="-50" max="50" value="0">
-      <label for="contrast">Contrast</label><input type="range" id="contrast" min="-50" max="50" value="0">
-      <label for="skew" id="skewLabel">Straighten</label><div style="display:flex;gap:8px;align-items:center"><input type="range" id="skew" min="-15" max="15" step="0.1" value="0"><button type="button" class="dbtn" id="skewAuto" style="min-height:36px;padding:4px 10px" aria-pressed="false">Auto</button></div>
+    <div class="adjpanel" id="adjPanel" hidden>
+      <div class="sliders">
+        <label for="brightness">Brightness</label><input type="range" id="brightness" min="-50" max="50" value="0">
+        <label for="contrast">Contrast</label><input type="range" id="contrast" min="-50" max="50" value="0">
+        <label for="skew" id="skewLabel">Straighten</label><div style="display:flex;gap:8px;align-items:center"><input type="range" id="skew" min="-15" max="15" step="0.1" value="0"><button type="button" class="dbtn" id="skewAuto" style="min-height:36px;padding:4px 10px" aria-pressed="false">Auto</button></div>
+      </div>
+      <label class="dcheck"><input type="checkbox" id="sharpen"> Sharpen text</label>
+      <label class="dcheck"><input type="checkbox" id="tidy"> Tidy edges and margins</label>
+      <label class="dcheck"><input type="checkbox" id="applyAll"> Use this look for every page</label>
     </div>
-    <label class="dcheck"><input type="checkbox" id="sharpen"> Sharpen text</label>
-    <label class="dcheck"><input type="checkbox" id="tidy"> Tidy edges and margins</label>
-    <label class="dcheck"><input type="checkbox" id="applyAll"> Use this look for every page in the document</label>
-    <div class="erow">
-      <button class="dbtn" id="recropBtn">Recrop</button>
-      <button class="dbtn" id="rotLBtn" aria-label="Rotate left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12a8 8 0 1 0 2.3-5.6M4 4v5h5"/></svg></button>
-      <button class="dbtn" id="rotRBtn" aria-label="Rotate right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5"/></svg></button>
-      <button class="dbtn go" id="saveBtn">Save page</button>
+    <div class="filters" id="filters" role="group" aria-label="Look"></div>
+    <div class="etools">
+      <button class="et" id="recropBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 2v15h15M2 7h15v15"/></svg>Crop</button>
+      <button class="et" id="rotLBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12a8 8 0 1 0 2.3-5.6M4 4v5h5"/></svg>Left</button>
+      <button class="et" id="rotRBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5"/></svg>Right</button>
+      <button class="et" id="adjToggle" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Adjust</button>
+      <button class="et ok" id="saveBtn" aria-label="Save page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></button>
     </div>
   </div>
 </section>
@@ -852,7 +871,7 @@ async function renderPage(page,src,cache){
   if(page.tidy!==false)out=tidyPage(out,!["color","none"].includes(page.profile));out=rotate(out,page.rot);
   page.quality=analyze(warped,out,page.quad,page.conf);
   page.processed=await canvasToBlob(out,"image/jpeg",.92);page.procW=out.width;page.procH=out.height;
-  page.thumb=await canvasToBlob(scaled(out,420),"image/jpeg",.8);page.hash=aHash(out);
+  page.thumb=await canvasToBlob(scaled(out,720),"image/jpeg",.85);page.hash=aHash(out);
   page.size=page.processed.size+page.original.size;page.updatedAt=Date.now();
   return page;
 }
@@ -1064,8 +1083,14 @@ function renderDocHead(){
   $("#docSub").textContent=`${n} ${n===1?"page":"pages"} · ${fmtSize(S.pages.reduce((a,p)=>a+(p.size||0),0))}`+(warnN?` · ${warnN} to review`:"");
   $("#dExport").disabled=n===0;$("#dShare").disabled=n===0;
 }
+function fullURL(p){const k="f:"+p.id+":"+p.updatedAt;let u=S.urls.get(k);if(!u){u=URL.createObjectURL(p.processed);S.urls.set(k,u)}return u}
+const IC_GRID='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>';
+const IC_PAGE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M8.5 8h7M8.5 12h7M8.5 16h4"/></svg>';
+$("#docViewMode").onclick=()=>{settings.docView=settings.docView==="grid"?"pages":"grid";saveSettings();renderDoc()};
 function renderDoc(){
-  renderDocHead();const grid=$("#docGrid");grid.innerHTML="";
+  const big=settings.docView!=="grid";const vm=$("#docViewMode");vm.innerHTML=big?IC_GRID:IC_PAGE;vm.setAttribute("aria-label",big?"Show pages as a grid":"Show pages full size");
+  if(big){renderDocPages();return}
+  renderDocHead();const grid=$("#docGrid");grid.className="pgrid";grid.innerHTML="";
   S.pages.forEach((p,i)=>{
     const el=document.createElement("div");el.className="pcard";
     const dup=S.pages.findIndex((o,j)=>j<i&&o.hash&&p.hash&&hamming(o.hash,p.hash)<=3);
@@ -1076,6 +1101,18 @@ function renderDoc(){
     el.querySelector(".pcover").onclick=()=>pageMenu(i);grid.appendChild(el);
   });
   const add=document.createElement("button");add.className="addpage";add.innerHTML=I.plus+"Add page";add.onclick=()=>openScanner({mode:"scan",sb:"batch",target:S.doc});grid.appendChild(add);
+}
+function renderDocPages(){
+  renderDocHead();const box=$("#docGrid");box.className="pview";box.innerHTML="";
+  S.pages.forEach((p,i)=>{
+    const dup=S.pages.findIndex((o,j)=>j<i&&o.hash&&p.hash&&hamming(o.hash,p.hash)<=3);
+    const warns=[...(p.quality?p.quality.warnings:[])].map(w=>WARN[w]);if(dup>=0)warns.push(`Looks the same as page ${dup+1}.`);
+    const el=document.createElement("figure");el.className="vpage";
+    el.innerHTML=`<button class="vimg" aria-label="Page ${i+1} options"><img alt="Page ${i+1}" src="${fullURL(p)}" decoding="async" loading="lazy" width="${p.procW}" height="${p.procH}"></button>
+      <figcaption><span>${i+1} / ${S.pages.length}</span>${warns.length?`<span class="pwarn">${warns.map(esc).join(" ")}</span>`:""}<button class="iconbtn" aria-label="Options for page ${i+1}">${I.more}</button></figcaption>`;
+    el.querySelector(".vimg").onclick=()=>pageMenu(i);el.querySelector("figcaption .iconbtn").onclick=()=>pageMenu(i);box.appendChild(el);
+  });
+  const add=document.createElement("button");add.className="addpage wide";add.innerHTML=I.plus+"Add page";add.onclick=()=>openScanner({mode:"scan",sb:"batch",target:S.doc});box.appendChild(add);
 }
 $("#backBtn").onclick=()=>{history.length>1&&S.cameFromList?history.back():go("")};
 $("#docName").onclick=()=>renameDoc(S.doc);
@@ -1150,7 +1187,7 @@ async function startCamera(){
   $("#scErr").hidden=true;$("#pill").hidden=false;setPill("Starting camera…");
   if(!window.isSecureContext||!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
     scanError("Camera unavailable","This view can’t open the camera directly. You can still take a photo with your phone’s camera app or import images.");return}
-  try{cam.stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:cam.facing},width:{ideal:1920},height:{ideal:1080},frameRate:{ideal:20,max:30}}})}
+  try{cam.stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:cam.facing},width:{ideal:2560},height:{ideal:1440},frameRate:{ideal:20,max:30}}})}
   catch(e){const n=e&&e.name;
     if(n==="NotAllowedError"||n==="SecurityError")scanError("Camera permission is off","Allow camera access for this site in your browser’s settings, then try again. Or use the phone’s camera app instead.");
     else if(n==="NotFoundError"||n==="OverconstrainedError")scanError("No camera found","This device doesn’t have a camera this page can use. Import images instead.");
@@ -1230,12 +1267,23 @@ async function camDoc(prefix){
   if(cam.doc&&!cam.doc.trashed){if(S.doc!==cam.doc)await openDoc(cam.doc);return cam.doc}
   cam.doc=await createDoc(prefix);S.doc=cam.doc;S.pages=[];return cam.doc;
 }
+// Takes a full-resolution photo when the browser allows it (much sharper than a video frame).
+async function grabStill(){
+  const vw=video.videoWidth,vh=video.videoHeight,frame=mk(vw,vh);frame.getContext("2d").drawImage(video,0,0,vw,vh);
+  if(window.ImageCapture&&cam.track){
+    try{const blob=await new ImageCapture(cam.track).takePhoto();let pc=await blobToCanvas(blob);
+      if(Math.max(pc.width,pc.height)>Math.max(vw,vh)){pc=scaled(pc,MAXSRC);
+        const same=Math.abs(pc.width/pc.height-vw/vh)<.03;return {c:pc,sameView:same}}}catch(e){}
+  }
+  return {c:frame,sameView:true};
+}
 async function capture(){
   if(!cam.running||cam.busy)return;cam.busy=true;
   const fl=$("#flash");fl.classList.remove("on");void fl.offsetWidth;fl.classList.add("on");
   try{
-    const vw=video.videoWidth,vh=video.videoHeight,c=mk(vw,vh);c.getContext("2d").drawImage(video,0,0,vw,vh);
-    const det=cam.quad&&cam.conf>=.45?{quad:cam.quad.map(p=>({...p})),conf:cam.conf}:{quad:defaultQuadN(),conf:0};
+    const g=await grabStill(),c=g.c;
+    let det=cam.quad&&cam.conf>=.45?{quad:cam.quad.map(p=>({...p})),conf:cam.conf}:{quad:defaultQuadN(),conf:0};
+    if(!g.sameView){const r=detectDoc(c);det=r.det&&r.det.conf>=.45?r.det:det}
     if(cam.mode==="id"){
       await tick();const page=await newPageFromCanvas(c,"tmp",det);cam.idSides.push(await blobToCanvas(page.processed));
       updateScanCount(page.thumb);cam.lastCapQuad=cam.quad?cam.quad.map(p=>({...p})):null;cam.armed=false;cam.lastCap=performance.now();cam.hist=[];cam.busy=false;
@@ -1247,7 +1295,7 @@ async function capture(){
     cam.count++;updateScanCount(page.thumb);
     if(page.quality.warnings.length)toast(WARN[page.quality.warnings[0]]);
     cam.lastCapQuad=cam.quad?cam.quad.map(p=>({...p})):null;cam.armed=false;cam.lastCap=performance.now();cam.hist=[];
-    if(cam.sb==="single"){cam.busy=false;await closeScanner();openEditor(page);return}
+    if(cam.sb==="single"){cam.busy=false;await closeScanner();openEditor(page,"adjust");return}
   }catch(e){toast("That capture couldn’t be saved. Your earlier pages are safe.")}
   cam.busy=false;
 }
@@ -1340,7 +1388,7 @@ $("#sWipe").onclick=async()=>{if(!await ask("Delete everything?","All documents 
 /* ================= Editor ================= */
 const ed=$("#editor"),stage=$("#stage"),cropWrap=$("#cropWrap"),adjWrap=$("#adjWrap"),cropCanvas=$("#cropCanvas"),outCanvas=$("#outCanvas"),loupe=$("#loupe");
 const handles=$$(".handle");let E=null,disp=1;
-async function openEditor(page){
+async function openEditor(page,startStep){
   busy("Opening page…",.2);
   try{
     const src=await blobToCanvas(page.original),W=src.width,H=src.height;
@@ -1349,14 +1397,15 @@ async function openEditor(page){
       hist:[],hi:-1,cache:{},manual:false,step:"crop"};
     pushHist();
     $("#brightness").value=E.adj.brightness||0;$("#contrast").value=E.adj.contrast||0;$("#sharpen").checked=!!E.adj.sharpen;$("#tidy").checked=E.tidy;$("#applyAll").checked=false;
-    ed.classList.add("on");document.body.style.overflow="hidden";setStep("crop");
+    ed.classList.add("on");document.body.style.overflow="hidden";$("#adjPanel").hidden=true;$("#adjToggle").setAttribute("aria-pressed","false");
+    if(startStep==="adjust"){setStep("adjust");await processEd()}else setStep("crop");
   }catch(e){toast("This page’s original photo couldn’t be opened.")}finally{busy(null)}
 }
 function closeEditor(){ed.classList.remove("on");document.body.style.overflow="";E=null}
 function setStep(s){E.step=s;cropWrap.hidden=s!=="crop";adjWrap.hidden=s!=="adjust";$("#cropBar").hidden=s!=="crop";$("#adjBar").hidden=s!=="adjust";
   $("#edCompare").hidden=s!=="adjust";$("#edSpacer").hidden=s==="adjust";
-  $("#edTitle").textContent=s==="crop"?"Drag the corners to the page edges":"Choose a look";requestAnimationFrame(layout)}
-function fit(W,H){return Math.max(.01,Math.min((stage.clientWidth-40)/W,(stage.clientHeight-40)/H))}
+  $("#edTitle").textContent=s==="crop"?"Drag the corners to the page edges":"";requestAnimationFrame(layout)}
+function fit(W,H){return Math.max(.01,Math.min((stage.clientWidth-16)/W,(stage.clientHeight-16)/H))}
 function layout(){
   if(!E)return;const dpr=Math.min(2,devicePixelRatio||1);
   if(E.step==="crop"){const W=E.src.width,H=E.src.height;disp=fit(W,H);const cw=W*disp,ch=H*disp;
@@ -1395,6 +1444,7 @@ $("#fullBtn").onclick=()=>{E.quad=denorm(fullQuadN(),E.src.width,E.src.height);E
 $("#resetBtn").onclick=()=>{E.quad=denorm(E.page.autoQuad,E.src.width,E.src.height);E.manual=false;pushHist()};
 $("#edCancel").onclick=closeEditor;
 $("#recropBtn").onclick=()=>setStep("crop");
+$("#adjToggle").onclick=()=>{const p=$("#adjPanel"),on=p.hidden;p.hidden=!on;$("#adjToggle").setAttribute("aria-pressed",String(on));requestAnimationFrame(layout)};
 $("#nextBtn").onclick=async()=>{if(quadArea(E.quad)<.01*E.src.width*E.src.height){toast("That area is too small. Spread the corners over the page.");return}setStep("adjust");await processEd()};
 async function processEd(){
   const b=$("#edBusy");b.classList.add("on");await tick();
