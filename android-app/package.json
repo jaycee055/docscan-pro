@@ -2,14 +2,15 @@
   "name": "docscan-pro-android",
   "private": true,
   "version": "1.0.0",
-  "description": "Android wrapper for DocScan Pro. Built by .github/workflows/android.yml",
+  "description": "Android and iPhone wrapper for DocScan Pro. Built by .github/workflows/android.yml and ios.yml",
   "dependencies": {
     "@capacitor/android": "^8.0.0",
     "@capacitor/app": "^8.0.0",
     "@capacitor/core": "^8.0.0",
     "@capacitor/filesystem": "^8.0.0",
     "@capacitor/share": "^8.0.0",
-    "jspdf": "2.5.1"
+    "jspdf": "2.5.1",
+    "@capacitor/ios": "^8.0.0"
   },
   "devDependencies": {
     "@capacitor/assets": "^4.0.0",

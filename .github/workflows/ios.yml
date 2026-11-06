@@ -1,0 +1,107 @@
+name: Build iPhone app
+
+# Without Apple keys this checks that the iPhone app builds.
+# With these repository secrets it signs the app and uploads it to TestFlight / App Store Connect:
+#   APPLE_TEAM_ID       10-character Team ID (developer.apple.com > Membership)
+#   ASC_KEY_ID          App Store Connect API key ID
+#   ASC_ISSUER_ID       App Store Connect API issuer ID
+#   ASC_KEY_P8          contents of the downloaded AuthKey_XXXX.p8 file
+on:
+  push:
+    branches: [main]
+    paths:
+      - index.html
+      - android-app/**
+      - .github/workflows/ios.yml
+  workflow_dispatch:
+
+concurrency:
+  group: ios-build
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: macos-15
+    env:
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Use the newest Xcode
+        run: |
+          sudo xcode-select -s "$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)"
+          xcodebuild -version
+
+      - name: Install Capacitor
+        working-directory: android-app
+        run: npm install --no-audit --no-fund
+
+      - name: Prepare web files (works offline, no CDN)
+        working-directory: android-app
+        run: |
+          mkdir -p www
+          cp ../index.html www/index.html
+          cp node_modules/jspdf/dist/jspdf.umd.min.js www/jspdf.umd.min.js
+          sed -i '' 's#https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js#jspdf.umd.min.js#' www/index.html
+          grep -q 'src="jspdf.umd.min.js"' www/index.html
+
+      - name: Create iPhone project
+        working-directory: android-app
+        run: |
+          npx cap add ios
+          PL=ios/App/App/Info.plist
+          /usr/libexec/PlistBuddy -c "Add :NSCameraUsageDescription string 'DocScan Pro uses the camera to scan your documents. Images stay on your iPhone.'" $PL
+          /usr/libexec/PlistBuddy -c "Add :NSPhotoLibraryUsageDescription string 'Choose photos of documents to turn into clean scans.'" $PL
+          /usr/libexec/PlistBuddy -c "Add :NSPhotoLibraryAddUsageDescription string 'Save scanned pages to your photos when you choose to.'" $PL
+          /usr/libexec/PlistBuddy -c "Add :UIFileSharingEnabled bool true" $PL
+          /usr/libexec/PlistBuddy -c "Add :LSSupportsOpeningDocumentsInPlace bool true" $PL
+          /usr/libexec/PlistBuddy -c "Add :ITSAppUsesNonExemptEncryption bool false" $PL
+
+      - name: App icon and splash screen
+        working-directory: android-app
+        continue-on-error: true
+        run: npx @capacitor/assets generate --ios --iconBackgroundColor '#2F6BFF' --splashBackgroundColor '#0F1316' --splashBackgroundColorDark '#0F1316'
+
+      - name: Sync
+        working-directory: android-app
+        run: npx cap sync ios
+
+      - name: Check that it builds (no Apple keys yet)
+        if: env.ASC_KEY_ID == ''
+        working-directory: android-app/ios/App
+        run: |
+          xcodebuild -project App.xcodeproj -scheme App -configuration Release -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build | tail -20
+          echo "iPhone app builds. Add the Apple secrets to upload it to TestFlight."
+
+      - name: Sign and upload to TestFlight
+        if: env.ASC_KEY_ID != ''
+        working-directory: android-app/ios/App
+        run: |
+          mkdir -p ~/private_keys
+          printf '%s' "$ASC_KEY_P8" > ~/private_keys/AuthKey_$ASC_KEY_ID.p8
+          AUTH="-allowProvisioningUpdates -authenticationKeyPath $HOME/private_keys/AuthKey_$ASC_KEY_ID.p8 -authenticationKeyID $ASC_KEY_ID -authenticationKeyIssuerID $ASC_ISSUER_ID"
+          xcodebuild -project App.xcodeproj -scheme App -configuration Release -destination 'generic/platform=iOS' \
+            -archivePath $RUNNER_TEMP/App.xcarchive DEVELOPMENT_TEAM=$APPLE_TEAM_ID CODE_SIGN_STYLE=Automatic \
+            PRODUCT_BUNDLE_IDENTIFIER=io.github.jaycee055.docscanpro MARKETING_VERSION=1.0 CURRENT_PROJECT_VERSION=${{ github.run_number }} \
+            $AUTH archive | tail -20
+          cat > $RUNNER_TEMP/ExportOptions.plist <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>destination</key><string>upload</string>
+            <key>teamID</key><string>$APPLE_TEAM_ID</string>
+            <key>signingStyle</key><string>automatic</string>
+          </dict></plist>
+          PLIST
+          xcodebuild -exportArchive -archivePath $RUNNER_TEMP/App.xcarchive -exportOptionsPlist $RUNNER_TEMP/ExportOptions.plist \
+            -exportPath $RUNNER_TEMP/export $AUTH | tail -20
+          echo "Uploaded build ${{ github.run_number }} to App Store Connect. It appears in TestFlight after Apple processes it."

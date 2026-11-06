@@ -7,6 +7,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>DocScan Pro</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-title" content="DocScan Pro">
+<meta name="mobile-web-app-capable" content="yes">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -473,13 +478,18 @@ a.btn{text-decoration:none}
       <button type="button" class="btn" id="sPersist">Ask the browser to keep my documents</button>
       <button type="button" class="btn danger" id="sWipe">Delete all documents on this device</button>
     </div>
+    <div class="card getios" hidden>
+      <h2>Install on iPhone</h2>
+      <p class="hint">Open this page in <b>Safari</b>, tap the <b>Share</b> button, then <b>Add to Home Screen</b>. DocScan Pro gets its own icon, opens full-screen and works offline.</p>
+      <p class="hint">An App Store version is on the way.</p>
+    </div>
     <div class="card getapp">
       <h2>Android app</h2>
       <p class="hint">Install DocScan Pro on your Android phone. It works offline, opens straight to the scanner and shares with Gmail, Messenger and other apps.</p>
       <a class="btn primary" id="apkBtn" href="https://github.com/jaycee055/docscan-pro/releases/latest/download/DocScanPro.apk" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m-4.5-4.5L12 15l4.5-4.5M5 20h14"/></svg>Download the Android app (APK)</a>
       <p class="hint">After it downloads, open the file. If Android asks, allow installing apps from your browser. It’s free and has no ads.</p>
     </div>
-    <p class="about">DocScan Pro is free, with no account and no limits.<br>Your scans never leave this device unless you share them.</p>
+    <p class="about">DocScan Pro is free, with no account and no limits.<br>Your scans never leave this device unless you share them.<br><a href="https://jaycee055.github.io/docscan-pro/privacy.html" target="_blank" rel="noopener" style="color:var(--accent)">Privacy policy</a></p>
   </section>
 
   <nav class="tabbar" aria-label="Main">
@@ -1650,9 +1660,15 @@ async function nativeShare(parts,title){
   await CP.Share.share({title,files:uris,dialogTitle:"Share "+title});
 }
 async function nativeSave(name,blob){
-  await CP.Filesystem.writeFile({path:"DocScan Pro/"+name,data:await blobToB64(blob),directory:"DOCUMENTS",recursive:true});
+  await CP.Filesystem.writeFile({path:(PLATFORM==="ios"?"":"DocScan Pro/")+name,data:await blobToB64(blob),directory:"DOCUMENTS",recursive:true});
   return "Documents/DocScan Pro/"+name;
 }
+const PLATFORM=NATIVE&&window.Capacitor.getPlatform?window.Capacitor.getPlatform():"web";
+const IS_IOS=PLATFORM==="ios"||/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+const STANDALONE=matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
+if(IS_IOS&&!NATIVE){$$(".getapp,.sideapk").forEach(e=>e.hidden=true);if(!STANDALONE)$(".getios").hidden=false}
+if(!NATIVE&&"serviceWorker" in navigator&&/^https?:$/.test(location.protocol)&&!/claude\.ai|claudeusercontent/.test(location.host))
+  window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
 if(NATIVE){
   document.documentElement.classList.add("native");
   if(CP.App&&CP.App.addListener)CP.App.addListener("backButton",()=>{
@@ -1933,7 +1949,7 @@ $("#exGo").onclick=async()=>{
 };
 async function saveFile(name,blob,st){
   if(NATIVE&&CP.Filesystem){
-    try{const where=await nativeSave(name,blob);st.textContent=`Saved to ${where}.`;toast("Saved to Documents › DocScan Pro");return}
+    try{const where=await nativeSave(name,blob);const msg=PLATFORM==="ios"?"Saved. Find it in the Files app › On My iPhone › DocScan Pro":`Saved to ${where}.`;st.textContent=msg;toast(PLATFORM==="ios"?"Saved to Files › DocScan Pro":"Saved to Documents › DocScan Pro");return}
     catch(e){try{await nativeShare([{name,blob}],name);st.textContent="Choose where to save it.";return}catch(e2){st.textContent="The file couldn’t be saved. Check the app’s storage permission and try again.";return}}
   }
   try{
