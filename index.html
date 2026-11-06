@@ -462,7 +462,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
       <h2>PDF and sharing</h2>
       <label class="field">Paper size<select id="sPaper">
         <option value="a4">A4</option><option value="letter">Letter (short bond)</option><option value="long">Long bond 8.5 × 13 in</option><option value="legal">Legal</option><option value="a3">A3</option><option value="a5">A5</option><option value="original">Same shape as scan</option></select></label>
-      <label class="field">Quality when sharing<select id="sShareQ"><option value="small">Smaller file (good for chat)</option><option value="normal">Balanced</option><option value="high">High (for printing)</option></select></label>
+      <label class="field">Quality when sharing<select id="sShareQ"><option value="small">Smaller file (good for chat)</option><option value="normal">Sharp (recommended)</option><option value="high">Maximum (for printing)</option></select></label>
     </div>
     <div class="card">
       <h2>Storage</h2>
@@ -653,9 +653,9 @@ input[type=range]{width:100%;accent-color:var(--accent)}
     </div>
     <div class="two">
       <label class="field">Margins<select id="exMargin"><option value="0">None</option><option value="5">Small (5 mm)</option><option value="12">Normal (12 mm)</option></select></label>
-      <label class="field">Resolution<select id="exDpi"><option value="150">150 DPI</option><option value="200">200 DPI</option><option value="300">300 DPI (print)</option></select></label>
+      <label class="field">Resolution<select id="exDpi"><option value="150">150 DPI</option><option value="200">200 DPI</option><option value="300" selected>300 DPI (print)</option></select></label>
     </div>
-    <label class="field" id="qualRow">Image quality <input type="range" id="exQual" min="50" max="95" value="85"></label>
+    <label class="field" id="qualRow">Image quality <input type="range" id="exQual" min="50" max="95" value="88"></label>
     <label class="ckline"><input type="checkbox" id="exGray"> Grayscale</label>
     <label class="ckline" id="numRow"><input type="checkbox" id="exNums"> Add page numbers</label>
     <div class="hint" id="exEstimate"></div>
@@ -1633,7 +1633,7 @@ async function finishId(){
 
 /* ================= Share ================= */
 let shareFmt="pdf",shareDocRef=null,shareReady=null;
-const SHAREQ={small:{dpi:150,quality:.72},normal:{dpi:200,quality:.82},high:{dpi:300,quality:.9}};
+const SHAREQ={small:{dpi:150,quality:.75},normal:{dpi:250,quality:.85},high:{dpi:300,quality:.9}};
 function canShareFiles(){try{return !!(navigator.share&&navigator.canShare&&navigator.canShare({files:[new File([new Blob(["x"])],"t.pdf",{type:"application/pdf"})]}))}catch(e){return false}}
 async function openShare(d){
   shareDocRef=d;shareReady=null;setShareFmt("pdf");
