@@ -311,6 +311,7 @@ a.btn{text-decoration:none}
 .freecard{background:var(--panel);border-radius:18px;padding:16px 18px;margin:0 0 18px;display:flex;flex-direction:column;gap:4px;font-size:15px;color:var(--muted)}
 .freecard b{color:var(--ink);font-size:17px}
 .freecard .sideapk{margin-top:10px}
+button.sideapk{background:transparent;border:0;padding:0;text-align:left;font:inherit;font-weight:600;cursor:pointer}
 @media (min-width:960px){.freecard{display:none}}
 /* ---------- Camera ---------- */
 .scanner{position:fixed;inset:0;background:#000;color:#fff;display:none;flex-direction:column;z-index:50}
@@ -394,7 +395,7 @@ a.btn{text-decoration:none}
       <button data-nav="tools"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M3 12h18"/></svg>Tools</button>
       <button data-nav="me"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Settings</button>
     </nav>
-    <div class="sidecard"><b>Free, no limits</b><span>No account needed. Your scans stay on this device.</span><span id="sideStorage"></span><a class="sideapk" href="https://github.com/jaycee055/docscan-pro/releases/latest/download/DocScanPro.apk" rel="noopener">Get the Android app</a></div>
+    <div class="sidecard"><b>Free, no limits</b><span>No account needed. Your scans stay on this device.</span><span id="sideStorage"></span><a class="sideapk" href="https://github.com/jaycee055/docscan-pro/releases/latest/download/DocScanPro.apk" rel="noopener">Get the Android app</a><button type="button" class="sideapk installbtn" hidden>Add to Home Screen</button></div>
   </aside>
 
   <!-- Home -->
@@ -424,7 +425,8 @@ a.btn{text-decoration:none}
       <b>Free, no limits</b>
       <span>No account needed. Your scans stay on this device.</span>
       <a class="sideapk" href="https://github.com/jaycee055/docscan-pro/releases/latest/download/DocScanPro.apk" rel="noopener">Get the Android app</a>
-      <a class="sideapk iosapk" href="#me" hidden>Install on iPhone</a>
+      <a class="sideapk iosapk" href="#me" hidden>Add to Home Screen</a>
+      <button type="button" class="sideapk installbtn" hidden>Add to Home Screen</button>
     </div>
     <div class="sheet">
       <div class="sechead"><h2>Recents</h2><span class="rviews" role="group" aria-label="Show recents as">
@@ -489,7 +491,7 @@ a.btn{text-decoration:none}
       <button type="button" class="btn danger" id="sWipe">Delete all documents on this device</button>
     </div>
     <div class="card getios" hidden>
-      <h2>Install on iPhone</h2>
+      <h2>Add to Home Screen</h2>
       <p class="hint">Open this page in <b>Safari</b>, tap the <b>Share</b> button, then <b>Add to Home Screen</b>. DocScan Pro gets its own icon, opens full-screen and works offline.</p>
       <p class="hint">An App Store version is on the way.</p>
     </div>
@@ -498,6 +500,7 @@ a.btn{text-decoration:none}
       <p class="hint">Install DocScan Pro on your Android phone. It works offline, opens straight to the scanner and shares with Gmail, Messenger and other apps.</p>
       <a class="btn primary" id="apkBtn" href="https://github.com/jaycee055/docscan-pro/releases/latest/download/DocScanPro.apk" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m-4.5-4.5L12 15l4.5-4.5M5 20h14"/></svg>Download the Android app (APK)</a>
       <p class="hint">After it downloads, open the file. If Android asks, allow installing apps from your browser. It’s free and has no ads.</p>
+      <button type="button" class="btn installbtn" hidden>Add to Home Screen instead</button>
     </div>
     <p class="about">DocScan Pro is free, with no account and no limits.<br>Your scans never leave this device unless you share them.<br><a href="https://jaycee055.github.io/docscan-pro/privacy.html" target="_blank" rel="noopener" style="color:var(--accent)">Privacy policy</a></p>
   </section>
@@ -1677,6 +1680,12 @@ const PLATFORM=NATIVE&&window.Capacitor.getPlatform?window.Capacitor.getPlatform
 const IS_IOS=PLATFORM==="ios"||/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
 const STANDALONE=matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
 if(IS_IOS&&!NATIVE){$$(".getapp,.sideapk:not(.iosapk)").forEach(e=>e.hidden=true);if(!STANDALONE){$(".getios").hidden=false;$(".iosapk").hidden=false}}
+// Chrome / Edge on Android and computers: offer the browser's own "Add to Home Screen" install.
+let installEvt=null;
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();installEvt=e;if(!NATIVE&&!STANDALONE)$$(".installbtn").forEach(b=>b.hidden=false)});
+window.addEventListener("appinstalled",()=>{installEvt=null;$$(".installbtn").forEach(b=>b.hidden=true);toast("DocScan Pro was added to your home screen")});
+$$(".installbtn").forEach(b=>b.onclick=async()=>{if(!installEvt){toast("Open your browser menu (⋮) and choose Add to Home screen.");return}
+  installEvt.prompt();try{const r=await installEvt.userChoice;if(r&&r.outcome==="accepted")$$(".installbtn").forEach(x=>x.hidden=true)}catch(e){}installEvt=null});
 if(!NATIVE&&"serviceWorker" in navigator&&/^https?:$/.test(location.protocol)&&!/claude\.ai|claudeusercontent/.test(location.host))
   window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
 if(NATIVE){
