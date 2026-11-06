@@ -14,7 +14,7 @@ Users' scans go into a private folder in your Google Drive; the user list goes i
    - Execute as: **Me**
    - Who has access: **Anyone**
    Click **Deploy**, then copy the **Web app URL** (it ends in `/exec`).
-5. In DocScan Pro, open **Me › Server address (for the app owner)**, paste the URL, tap **Test** then **Save**.
+5. Open **https://jaycee055.github.io/docscan-pro/#owner** (this private link shows the owner box; other users never see it), paste the URL, tap **Test** then **Save**.
    Sign up works on that device right away.
 6. Send the URL to Claude (or put it in `BACKEND_DEFAULT` in `index.html`) so every user gets accounts.
 

@@ -311,6 +311,7 @@ a.btn{text-decoration:none}
 .opt{font-size:12px;font-weight:600;color:var(--muted);background:var(--panel-2);border-radius:20px;padding:2px 8px;vertical-align:2px;margin-left:6px}
 .meter{height:8px;border-radius:4px;background:var(--panel-3);overflow:hidden}.meter i{display:block;height:100%;width:0;background:var(--accent)}
 .adv summary{cursor:pointer;font-weight:600;color:var(--muted)}
+.adv[open]{display:flex}.adv input{max-width:100%}
 #acctOut,#acctIn{display:flex;flex-direction:column;gap:12px}
 .freecard{background:var(--panel);border-radius:18px;padding:16px 18px;margin:0 0 18px;display:flex;flex-direction:column;gap:4px;font-size:15px;color:var(--muted)}
 .freecard b{color:var(--ink);font-size:17px}
@@ -530,7 +531,7 @@ button.sideapk{background:transparent;border:0;padding:0;text-align:left;font:in
       <p class="hint">After it downloads, open the file. If Android asks, allow installing apps from your browser. It’s free and has no ads.</p>
       <button type="button" class="btn installbtn" hidden>Add to Home Screen instead</button>
     </div>
-    <details class="card adv"><summary>Server address (for the app owner)</summary>
+    <details class="card adv" hidden><summary>Server address (for the app owner)</summary>
       <p class="hint">Paste the web app address from your Google Apps Script deployment to switch on accounts on this device.</p>
       <label class="field">Address<input type="text" id="beUrl" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off"></label>
       <div class="acts"><button type="button" class="btn" id="beTest">Test</button><button type="button" class="btn primary" id="beSave">Save</button></div>
@@ -1278,6 +1279,7 @@ function route(){
   const h=location.hash.slice(1);const m=h.match(/^doc-([a-z0-9]+)$/);
   if(m){const d=S.docs.find(x=>x.id===m[1]);if(d&&!d.trashed){openDocView(d);return}}
   $("#docView").hidden=true;S.doc=null;
+  if(h==="owner"){$(".adv").hidden=false;$(".adv").open=true;showTab("me");setTimeout(()=>$(".adv").scrollIntoView({block:"center"}),50);return}
   showTab(TABS.includes(h)?h:"home");
 }
 window.addEventListener("hashchange",route);
