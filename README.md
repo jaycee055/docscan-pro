@@ -25,3 +25,8 @@ PDF, JPG or PNG. No account, no subscription. Everything runs on your device; no
 ## Run it
 It is a single file. Open `index.html` in a browser, or host it with GitHub Pages
 (Settings → Pages → deploy from the `main` branch). The camera needs HTTPS, which GitHub Pages provides.
+
+## Android app
+[**Download DocScan Pro for Android (APK)**](https://github.com/jaycee055/docscan-pro/releases/latest/download/DocScanPro.apk)
+
+Open the file on your phone and allow installing from your browser if Android asks. Each update to the app is built automatically by GitHub Actions (`.github/workflows/android.yml`) and published on the [Releases page](https://github.com/jaycee055/docscan-pro/releases). Installing a newer APK over an older one keeps your scans.
