@@ -15,7 +15,7 @@ const STOP_WHEN_DRIVE_PERCENT = 85;   // refuse new uploads when your Drive is t
 const MAX_SIGNUPS_PER_DAY = 50;
 const MAX_FAILED_LOGINS = 5;          // per email, per 15 minutes
 const SESSION_DAYS = 60;
-const HASH_ROUNDS = 3000;
+const HASH_ROUNDS = 800;
 
 // ---------------------------------------------------------------------
 function setup() {

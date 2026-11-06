@@ -1797,7 +1797,7 @@ $("#shareGo").onclick=async()=>{
 const safeName=s=>(s||"Scan").replace(/[\\/:*?"<>|]+/g,"-").replace(/\.(pdf|jpg|png|zip)$/i,"").trim().slice(0,120)||"Scan";
 
 /* ================= Optional account and backup ================= */
-const BACKEND_DEFAULT="";   // filled in once the owner's Google Apps Script is deployed
+const BACKEND_DEFAULT="https://script.google.com/macros/s/AKfycby6KQVyhZQ0j1otP6BnJYHxhjqEyQ2T32ebkZQx3_z5F8Nqe4NTc4mrEa1xuf69cdkfxA/exec";   // owner's Google Apps Script (backend/Code.gs)
 const backendUrl=()=>(settings.backendUrl||BACKEND_DEFAULT||"").trim();
 const AERR={invalid_email:"Enter a valid email address.",weak_password:"Use at least 8 characters for the password.",consent_required:"Tick the box to agree to how backups are kept.",
   email_taken:"That email already has an account. Log in instead.",wrong_login:"Email or password is wrong.",too_many_attempts:"Too many tries. Wait 15 minutes and try again.",
