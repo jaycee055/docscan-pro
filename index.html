@@ -308,6 +308,10 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 a.btn{text-decoration:none}
 .sideapk{margin-top:8px;color:var(--accent);font-weight:600;text-decoration:none}
 .native .getapp,.native .sideapk{display:none!important}
+.freecard{background:var(--panel);border-radius:18px;padding:16px 18px;margin:0 0 18px;display:flex;flex-direction:column;gap:4px;font-size:15px;color:var(--muted)}
+.freecard b{color:var(--ink);font-size:17px}
+.freecard .sideapk{margin-top:10px}
+@media (min-width:960px){.freecard{display:none}}
 /* ---------- Camera ---------- */
 .scanner{position:fixed;inset:0;background:#000;color:#fff;display:none;flex-direction:column;z-index:50}
 .scanner.on{display:flex}
@@ -415,6 +419,12 @@ a.btn{text-decoration:none}
       <button class="tool" data-act="fav"><span class="ic c-pink"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="m12 3 2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 16.8l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z"/></svg></span>Favorites</button>
       <button class="tool" data-act="trash"><span class="ic c-red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg></span>Trash</button>
       <button class="tool" data-act="tools"><span class="ic c-grey"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><circle cx="16.5" cy="16.5" r="3.5"/></svg></span>All</button>
+    </div>
+    <div class="freecard" id="freeCard">
+      <b>Free, no limits</b>
+      <span>No account needed. Your scans stay on this device.</span>
+      <a class="sideapk" href="https://github.com/jaycee055/docscan-pro/releases/latest/download/DocScanPro.apk" rel="noopener">Get the Android app</a>
+      <a class="sideapk iosapk" href="#me" hidden>Install on iPhone</a>
     </div>
     <div class="sheet">
       <div class="sechead"><h2>Recents</h2><span class="rviews" role="group" aria-label="Show recents as">
@@ -1666,7 +1676,7 @@ async function nativeSave(name,blob){
 const PLATFORM=NATIVE&&window.Capacitor.getPlatform?window.Capacitor.getPlatform():"web";
 const IS_IOS=PLATFORM==="ios"||/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
 const STANDALONE=matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
-if(IS_IOS&&!NATIVE){$$(".getapp,.sideapk").forEach(e=>e.hidden=true);if(!STANDALONE)$(".getios").hidden=false}
+if(IS_IOS&&!NATIVE){$$(".getapp,.sideapk:not(.iosapk)").forEach(e=>e.hidden=true);if(!STANDALONE){$(".getios").hidden=false;$(".iosapk").hidden=false}}
 if(!NATIVE&&"serviceWorker" in navigator&&/^https?:$/.test(location.protocol)&&!/claude\.ai|claudeusercontent/.test(location.host))
   window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
 if(NATIVE){
