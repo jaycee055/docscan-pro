@@ -36,3 +36,7 @@ Open the file on your phone and allow installing from your browser if Android as
 - **App Store:** `.github/workflows/ios.yml` builds the iPhone app on GitHub's Mac runners. Without Apple keys it only checks that the app builds. After joining the Apple Developer Program, add the repository secrets `APPLE_TEAM_ID`, `ASC_KEY_ID`, `ASC_ISSUER_ID` and `ASC_KEY_P8`, and every update is uploaded to TestFlight / App Store Connect.
 
 [Privacy policy](https://jaycee055.github.io/docscan-pro/privacy.html)
+
+## Optional accounts and backup
+Sign up / log in is optional. With an account, scans are backed up and can be restored on any device; without one, everything still works and a **backup file** can be saved and restored.
+Accounts run free in the owner's Google account via Google Apps Script (`backend/Code.gs`). Setup: [`backend/SETUP.md`](backend/SETUP.md).

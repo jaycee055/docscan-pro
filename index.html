@@ -103,7 +103,7 @@ select{min-height:44px;padding:8px 10px;border-radius:12px;border:1px solid var(
 .switch:checked::after{transform:translateX(20px)}
 @media (prefers-reduced-motion:reduce){.switch,.switch::after{transition:none}}
 .field{display:flex;flex-direction:column;gap:6px;font-weight:500;font-size:14px;color:var(--muted)}
-.field input[type=text],.field input[type=number],.field select{min-height:46px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--panel-2);color:var(--ink);font-weight:400;font-size:16px;width:100%}
+.field input[type=text],.field input[type=number],.field input[type=email],.field input[type=password],.field select{min-height:46px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--panel-2);color:var(--ink);font-weight:400;font-size:16px;width:100%}
 .hint{font-size:14px;color:var(--muted);margin:0}
 .btn{border:0;background:var(--panel-2);border-radius:12px;padding:12px 14px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px}
 .btn svg{width:20px;height:20px}
@@ -307,7 +307,11 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 }
 a.btn{text-decoration:none}
 .sideapk{margin-top:8px;color:var(--accent);font-weight:600;text-decoration:none}
-.native .getapp,.native .sideapk{display:none!important}
+.native .getapp,.native .sideapk:not(.acctlink){display:none!important}
+.opt{font-size:12px;font-weight:600;color:var(--muted);background:var(--panel-2);border-radius:20px;padding:2px 8px;vertical-align:2px;margin-left:6px}
+.meter{height:8px;border-radius:4px;background:var(--panel-3);overflow:hidden}.meter i{display:block;height:100%;width:0;background:var(--accent)}
+.adv summary{cursor:pointer;font-weight:600;color:var(--muted)}
+#acctOut,#acctIn{display:flex;flex-direction:column;gap:12px}
 .freecard{background:var(--panel);border-radius:18px;padding:16px 18px;margin:0 0 18px;display:flex;flex-direction:column;gap:4px;font-size:15px;color:var(--muted)}
 .freecard b{color:var(--ink);font-size:17px}
 .freecard .sideapk{margin-top:10px}
@@ -395,7 +399,7 @@ button.sideapk{background:transparent;border:0;padding:0;text-align:left;font:in
       <button data-nav="tools"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M3 12h18"/></svg>Tools</button>
       <button data-nav="me"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Settings</button>
     </nav>
-    <div class="sidecard"><b>Free, no limits</b><span>No account needed. Your scans stay on this device.</span><span id="sideStorage"></span><a class="sideapk" href="https://github.com/jaycee055/docscan-pro/releases/latest/download/DocScanPro.apk" rel="noopener">Get the Android app</a><button type="button" class="sideapk installbtn" hidden>Add to Home Screen</button></div>
+    <div class="sidecard"><b>Free, no limits</b><span>No account needed. Your scans stay on this device.</span><span id="sideStorage"></span><a class="sideapk acctlink" href="#me">Sign up or log in (optional)</a><a class="sideapk" href="https://github.com/jaycee055/docscan-pro/releases/latest/download/DocScanPro.apk" rel="noopener">Get the Android app</a><button type="button" class="sideapk installbtn" hidden>Add to Home Screen</button></div>
   </aside>
 
   <!-- Home -->
@@ -424,6 +428,7 @@ button.sideapk{background:transparent;border:0;padding:0;text-align:left;font:in
     <div class="freecard" id="freeCard">
       <b>Free, no limits</b>
       <span>No account needed. Your scans stay on this device.</span>
+      <a class="sideapk acctlink" href="#me">Sign up or log in to back up (optional)</a>
       <a class="sideapk" href="https://github.com/jaycee055/docscan-pro/releases/latest/download/DocScanPro.apk" rel="noopener">Get the Android app</a>
       <a class="sideapk iosapk" href="#me" hidden>Add to Home Screen</a>
       <button type="button" class="sideapk installbtn" hidden>Add to Home Screen</button>
@@ -468,6 +473,29 @@ button.sideapk{background:transparent;border:0;padding:0;text-align:left;font:in
   <!-- Me -->
   <section class="tab" id="tabMe" aria-label="Me" hidden>
     <div class="tabhead"><h1>Me</h1></div>
+    <div class="card" id="acctCard">
+      <h2>Account <span class="opt">optional</span></h2>
+      <div id="acctOut">
+        <p class="hint">Sign up to back up your scans and get them back on any phone or computer. DocScan Pro works fully without an account.</p>
+        <div class="acts"><button type="button" class="btn primary" id="suBtn">Sign up</button><button type="button" class="btn" id="liBtn">Log in</button></div>
+        <p class="hint" id="acctOff" hidden>Accounts aren’t switched on yet. You can still use everything, and save a backup file below.</p>
+      </div>
+      <div id="acctIn" hidden>
+        <p class="hint">Signed in as <b id="acctEmail"></b></p>
+        <div class="meter"><i id="acctBar"></i></div>
+        <p class="hint" id="acctUse"></p>
+        <div class="acts"><button type="button" class="btn primary" id="bkNow">Back up now</button><button type="button" class="btn" id="bkRestore">Restore my scans</button></div>
+        <label class="check">Back up automatically after changes<input class="switch" type="checkbox" id="bkAuto"></label>
+        <p class="hint" id="bkLast"></p>
+        <div class="acts"><button type="button" class="btn" id="loBtn">Log out</button><button type="button" class="btn danger" id="delAcct">Delete account</button></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Backup file</h2>
+      <p class="hint">Save every scan into one file and keep it anywhere, such as Google Drive or Messenger to yourself. Restore it on a new phone. No account needed.</p>
+      <div class="acts"><button type="button" class="btn" id="bfSave">Save backup file</button><button type="button" class="btn" id="bfLoad">Restore from file</button></div>
+      <input class="sr" type="file" accept=".zip,application/zip" id="bfInput" tabindex="-1" aria-hidden="true">
+    </div>
     <div class="card">
       <h2>Scanning</h2>
       <label class="check">Capture automatically when the page is steady<input class="switch" type="checkbox" id="sAuto"></label>
@@ -502,6 +530,12 @@ button.sideapk{background:transparent;border:0;padding:0;text-align:left;font:in
       <p class="hint">After it downloads, open the file. If Android asks, allow installing apps from your browser. It’s free and has no ads.</p>
       <button type="button" class="btn installbtn" hidden>Add to Home Screen instead</button>
     </div>
+    <details class="card adv"><summary>Server address (for the app owner)</summary>
+      <p class="hint">Paste the web app address from your Google Apps Script deployment to switch on accounts on this device.</p>
+      <label class="field">Address<input type="text" id="beUrl" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off"></label>
+      <div class="acts"><button type="button" class="btn" id="beTest">Test</button><button type="button" class="btn primary" id="beSave">Save</button></div>
+      <p class="hint" id="beStatus"></p>
+    </details>
     <p class="about">DocScan Pro is free, with no account and no limits.<br>Your scans never leave this device unless you share them.<br><a href="https://jaycee055.github.io/docscan-pro/privacy.html" target="_blank" rel="noopener" style="color:var(--accent)">Privacy policy</a></p>
   </section>
 
@@ -699,6 +733,20 @@ button.sideapk{background:transparent;border:0;padding:0;text-align:left;font:in
     </div>
   </form>
 </dialog>
+
+<!-- Sign up / log in -->
+<dialog id="authDlg"><form class="dlg" id="authForm" novalidate>
+  <div class="grab"></div>
+  <h2 id="authTitle">Sign up</h2>
+  <p class="hint" id="authSub">Back up your scans and use them on any device. Optional and free.</p>
+  <label class="field" id="authNameRow">Name<input type="text" id="authName" autocomplete="name" maxlength="60"></label>
+  <label class="field">Email<input type="email" id="authEmail" autocomplete="email" required></label>
+  <label class="field">Password<input type="password" id="authPw" autocomplete="new-password" minlength="8" required></label>
+  <label class="ckline" id="authConsentRow"><input type="checkbox" id="authConsent"> <span>I agree that my backups are kept in the DocScan Pro owner’s Google Drive, as explained in the <a href="https://jaycee055.github.io/docscan-pro/privacy.html" target="_blank" rel="noopener" style="color:var(--accent)">privacy policy</a>.</span></label>
+  <p class="warnbox" id="authErr" hidden></p>
+  <div class="acts"><button class="btn" type="button" id="authClose">Cancel</button><button class="btn primary" type="submit" id="authGo">Sign up</button></div>
+  <button class="linkbtn" type="button" id="authSwitch" style="align-self:center">Already have an account? Log in</button>
+</form></dialog>
 
 <!-- Merge -->
 <dialog id="mergeDlg"><div class="dlg">
@@ -1199,7 +1247,7 @@ async function createDoc(prefix){
   const d={id:uid(),name:docName(prefix),createdAt:Date.now(),updatedAt:Date.now(),favorite:false,trashed:false,pageOrder:[]};
   await db.put("docs",d);S.docs.push(d);return d;
 }
-async function touchDoc(d){d.updatedAt=Date.now();const {_size,_cover,...rest}=d;await db.put("docs",rest)}
+async function touchDoc(d){d.updatedAt=Date.now();const {_size,_cover,...rest}=d;await db.put("docs",rest);if(typeof scheduleBackup==="function")scheduleBackup()}
 async function pagesOf(d){const ps=await db.pagesOf(d.id);return d.pageOrder.map(id=>ps.find(p=>p.id===id)).filter(Boolean)}
 
 /* ================= Icons ================= */
@@ -1746,9 +1794,151 @@ $("#shareGo").onclick=async()=>{
 };
 const safeName=s=>(s||"Scan").replace(/[\\/:*?"<>|]+/g,"-").replace(/\.(pdf|jpg|png|zip)$/i,"").trim().slice(0,120)||"Scan";
 
+/* ================= Optional account and backup ================= */
+const BACKEND_DEFAULT="";   // filled in once the owner's Google Apps Script is deployed
+const backendUrl=()=>(settings.backendUrl||BACKEND_DEFAULT||"").trim();
+const AERR={invalid_email:"Enter a valid email address.",weak_password:"Use at least 8 characters for the password.",consent_required:"Tick the box to agree to how backups are kept.",
+  email_taken:"That email already has an account. Log in instead.",wrong_login:"Email or password is wrong.",too_many_attempts:"Too many tries. Wait 15 minutes and try again.",
+  signups_full_today:"Sign-ups are full for today. Try again tomorrow.",signed_out:"You were signed out. Log in again.",quota_full:"Your backup space is full. Delete old documents, or save a backup file instead.",
+  server_storage_full:"Backup storage is full right now. Save a backup file instead.",wrong_password:"That password is wrong.",no_backend:"Accounts aren’t switched on yet.",
+  not_set_up:"The server isn’t set up yet. The owner needs to run setup in Apps Script.",network:"Couldn’t reach the server. Check your internet and try again."};
+const aerr=e=>AERR[e&&e.message]||AERR.network;
+async function api(action,data){
+  const url=backendUrl();if(!url)throw new Error("no_backend");
+  let j;try{const r=await fetch(url,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action,...data})});j=await r.json()}catch(e){throw new Error("network")}
+  if(!j.ok){if(j.error==="signed_out"){settings.session=null;saveSettings();renderAccount()}throw new Error(j.error||"network")}
+  return j;
+}
+function renderAccount(){
+  const on=!!settings.session,has=!!backendUrl();
+  $("#acctOut").hidden=on;$("#acctIn").hidden=!on;$("#acctOff").hidden=has;$("#suBtn").disabled=!has;$("#liBtn").disabled=!has;
+  $$(".acctlink").forEach(a=>{a.textContent=on?"Backed up as "+(settings.user&&settings.user.email||"you"):(a.closest(".sidecard")?"Sign up or log in (optional)":"Sign up or log in to back up (optional)")});
+  if(on){const u=settings.user||{};$("#acctEmail").textContent=u.email||"";const used=u.usedBytes||0,q=u.quotaBytes||1;
+    $("#acctBar").style.width=Math.min(100,used/q*100)+"%";$("#acctUse").textContent=`${fmtSize(used)} of ${fmtSize(q)} backup space used`;
+    $("#bkAuto").checked=settings.autoBackup!==false;$("#bkLast").textContent=settings.lastBackup?"Last backup: "+fmtWhen(settings.lastBackup):"Not backed up yet."}
+}
+let authMode="signup";
+function openAuth(mode){authMode=mode;const su=mode==="signup";
+  $("#authTitle").textContent=su?"Sign up":"Log in";$("#authGo").textContent=su?"Sign up":"Log in";$("#authNameRow").hidden=!su;$("#authConsentRow").hidden=!su;
+  $("#authSub").textContent=su?"Back up your scans and use them on any device. Optional and free.":"Welcome back. Log in to get your backed-up scans.";
+  $("#authPw").autocomplete=su?"new-password":"current-password";$("#authSwitch").textContent=su?"Already have an account? Log in":"New here? Sign up";
+  $("#authErr").hidden=true;$("#authDlg").showModal();setTimeout(()=>(su?$("#authName"):$("#authEmail")).focus(),40)}
+$("#suBtn").onclick=()=>openAuth("signup");$("#liBtn").onclick=()=>openAuth("login");
+$("#authSwitch").onclick=()=>openAuth(authMode==="signup"?"login":"signup");
+$("#authClose").onclick=()=>$("#authDlg").close();
+$("#authForm").onsubmit=async e=>{e.preventDefault();const err=$("#authErr"),btn=$("#authGo");err.hidden=true;
+  const email=$("#authEmail").value.trim(),password=$("#authPw").value;
+  if(authMode==="signup"&&password.length<8){err.textContent=AERR.weak_password;err.hidden=false;return}
+  if(authMode==="signup"&&!$("#authConsent").checked){err.textContent=AERR.consent_required;err.hidden=false;return}
+  btn.disabled=true;btn.textContent=authMode==="signup"?"Creating account…":"Logging in…";
+  try{const r=await api(authMode,{email,password,name:$("#authName").value.trim(),consent:$("#authConsent").checked});
+    settings.session=r.token;settings.user=r.user;settings.autoBackup=true;saveSettings();$("#authPw").value="";$("#authDlg").close();renderAccount();
+    toast(authMode==="signup"?"Account created. Backing up your scans…":"Logged in");
+    if(authMode==="login"){await restoreAccount(true)}await backupNow(false)}
+  catch(x){err.textContent=aerr(x);err.hidden=false}
+  btn.disabled=false;btn.textContent=authMode==="signup"?"Sign up":"Log in"};
+$("#loBtn").onclick=async()=>{if(!await ask("Log out?","Your scans stay on this device. Backups stay safe in your account.","Log out"))return;
+  try{await api("logout",{token:settings.session})}catch(e){}settings.session=null;settings.user=null;saveSettings();renderAccount();toast("Logged out")};
+$("#delAcct").onclick=async()=>{$("#askInput").type="password";const pw=await ask("Delete your account?","This deletes your account and every backup in it. Scans on this device stay. Type your password to confirm.","Delete account",true,"");
+  $("#askInput").type="text";if(pw==null)return;busy("Deleting account…",.5);try{await api("deleteAccount",{token:settings.session,password:pw});settings.session=null;settings.user=null;settings.synced=[];saveSettings();renderAccount();toast("Account and backups deleted")}
+  catch(e){toast(aerr(e))}finally{busy(null)}};
+$("#bkAuto").onchange=e=>{settings.autoBackup=e.target.checked;saveSettings()};
+$("#bkNow").onclick=()=>backupNow(false);
+$("#bkRestore").onclick=()=>restoreAccount(false);
+// backend address (owner)
+$("#beUrl").value=settings.backendUrl||BACKEND_DEFAULT;
+$("#beTest").onclick=async()=>{const u=$("#beUrl").value.trim(),st=$("#beStatus");st.textContent="Testing…";
+  try{const r=await fetch(u,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"me"})});const j=await r.json();
+    st.textContent=j&&(j.error==="signed_out"||j.ok)?"Connected. Accounts will work.":j&&j.error==="not_set_up"?"Reached it, but setup hasn’t been run in Apps Script yet.":"Reached something, but it doesn’t look like the DocScan Pro script."}
+  catch(e){st.textContent="Couldn’t reach that address. Check it ends in /exec and the deployment allows Anyone."}};
+$("#beSave").onclick=()=>{settings.backendUrl=$("#beUrl").value.trim();saveSettings();renderAccount();$("#beStatus").textContent=settings.backendUrl?"Saved. Sign up is switched on for this device.":"Cleared."};
+
+const pageMeta=p=>{const {original,processed,thumb,...m}=p;return m};
+const fileNames=p=>[`p_${p.id}_o.jpg`,`p_${p.id}_x.jpg`];
+let backingUp=false,autoT=null;
+function scheduleBackup(){if(!settings.session||settings.autoBackup===false||!backendUrl())return;clearTimeout(autoT);autoT=setTimeout(()=>backupNow(true),20000)}
+async function backupNow(silent){
+  if(!settings.session||backingUp)return;backingUp=true;
+  try{
+    if(!silent)busy("Checking your backup…",0);
+    const remote=await api("list",{token:settings.session}),rmap={};remote.docs.forEach(d=>rmap[d.id]=d);
+    const docs=S.docs.filter(d=>!d.trashed),work=[];
+    for(const d of docs){const ps=await pagesOf(d),rp={};((rmap[d.id]||{}).pages||[]).forEach(p=>rp[p.id]=p.updatedAt);
+      work.push({d,ps,todo:ps.filter(p=>rp[p.id]!==p.updatedAt),metaChanged:!rmap[d.id]||rmap[d.id].updatedAt!==d.updatedAt||ps.length!==(rmap[d.id].pages||[]).length})}
+    const total=work.reduce((a,w)=>a+w.todo.length,0);let done=0,used=null;
+    for(const w of work){
+      for(const p of w.todo){if(!silent)busy(`Backing up page ${done+1} of ${total}…`,done/Math.max(1,total));
+        const [on,xn]=fileNames(p);
+        await api("putFile",{token:settings.session,docId:w.d.id,name:on,mime:"image/jpeg",b64:await blobToB64(p.original)});
+        const r=await api("putFile",{token:settings.session,docId:w.d.id,name:xn,mime:"image/jpeg",b64:await blobToB64(p.processed)});used=r.usedBytes;done++}
+      if(w.metaChanged||w.todo.length){const {_size,_cover,...doc}=w.d;await api("putMeta",{token:settings.session,docId:w.d.id,meta:{...doc,pages:w.ps.map(pageMeta)}})}
+    }
+    // documents deleted for good on this device, which were backed up from here before
+    const local=new Set(S.docs.map(d=>d.id));
+    for(const id of (settings.synced||[]))if(!local.has(id)&&rmap[id]){const r=await api("deleteDoc",{token:settings.session,docId:id});used=r.usedBytes}
+    settings.synced=docs.map(d=>d.id);settings.lastBackup=Date.now();
+    if(used!=null&&settings.user)settings.user.usedBytes=used;else if(remote.user)settings.user=remote.user;
+    saveSettings();renderAccount();
+    if(!silent)toast(total?`Backed up ${total} ${total===1?"page":"pages"}`:"Everything is already backed up");
+  }catch(e){if(!silent||e.message==="quota_full"||e.message==="server_storage_full")toast(aerr(e))}
+  finally{backingUp=false;if(!silent)busy(null)}
+}
+// Adds documents and pages that aren't on this device yet. Never overwrites or deletes local scans.
+async function restoreFrom(metas,getBlob,progress){
+  let added=0;const all=metas.reduce((a,m)=>a+(m.pages||[]).length,0);let seen=0;
+  for(const m of metas){
+    let d=S.docs.find(x=>x.id===m.id);const localPages=d?await db.pagesOf(d.id):[],have=new Set(localPages.map(p=>p.id));
+    if(!d){d={id:m.id,name:m.name||"Restored scan",createdAt:m.createdAt||Date.now(),updatedAt:m.updatedAt||Date.now(),favorite:!!m.favorite,trashed:false,pageOrder:[]};S.docs.push(d)}
+    for(const pm of (m.pages||[])){seen++;progress&&progress(seen,all);if(have.has(pm.id))continue;
+      const [on,xn]=fileNames(pm),original=await getBlob(m.id,on),processed=await getBlob(m.id,xn);if(!original||!processed)continue;
+      const thumb=await canvasToBlob(scaled(await blobToCanvas(processed),720),"image/jpeg",.85);
+      await savePage({...pm,docId:d.id,original,processed,thumb,size:original.size+processed.size});added++}
+    const ids=new Set((await db.pagesOf(d.id)).map(p=>p.id));
+    d.pageOrder=[...(m.pageOrder||[]).filter(id=>ids.has(id)),...d.pageOrder.filter(id=>ids.has(id)&&!(m.pageOrder||[]).includes(id))];
+    ids.forEach(id=>{if(!d.pageOrder.includes(id))d.pageOrder.push(id)});
+    const {_size,_cover,...rest}=d;await db.put("docs",rest);
+  }
+  await computeDocMeta();renderHome();renderFiles();return added;
+}
+const b64ToBlob=(b64,type)=>{const bin=atob(b64),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new Blob([u],{type})};
+async function restoreAccount(quiet){
+  if(!settings.session)return;
+  try{busy("Getting your backups…",0);const r=await api("list",{token:settings.session});
+    const added=await restoreFrom(r.docs,async(docId,name)=>{try{const f=await api("getFile",{token:settings.session,docId,name});return b64ToBlob(f.b64,f.mime||"image/jpeg")}catch(e){return null}},
+      (i,n)=>busy(`Restoring page ${i} of ${n}…`,i/Math.max(1,n)));
+    settings.synced=[...new Set([...(settings.synced||[]),...r.docs.map(d=>d.id)])];if(r.user)settings.user=r.user;saveSettings();renderAccount();
+    busy(null);if(!quiet||added)toast(added?`Restored ${added} ${added===1?"page":"pages"}`:"Everything in your backup is already on this device")}
+  catch(e){busy(null);toast(aerr(e))}
+}
+// Backup file (no account): a ZIP with backup.json plus the page images.
+$("#bfSave").onclick=async()=>{
+  const docs=S.docs.filter(d=>!d.trashed);if(!docs.length){toast("There are no scans to back up yet.");return}
+  busy("Making the backup file…",0);
+  try{const files=[],metas=[];let i=0;
+    for(const d of docs){const ps=await pagesOf(d);const {_size,_cover,...doc}=d;metas.push({...doc,pages:ps.map(pageMeta)});
+      for(const p of ps){const [on,xn]=fileNames(p);files.push({name:`${d.id}/${on}`,blob:p.original},{name:`${d.id}/${xn}`,blob:p.processed})}busy("Making the backup file…",++i/docs.length)}
+    files.unshift({name:"backup.json",blob:new Blob([JSON.stringify({app:"DocScan Pro",version:1,created:Date.now(),docs:metas})],{type:"application/json"})});
+    const zip=await makeZip(files),d=new Date(),pad=v=>String(v).padStart(2,"0");busy(null);
+    const st={set textContent(v){toast(v)}};await saveFile(`DocScan Pro backup ${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}.zip`,zip,st)}
+  catch(e){busy(null);toast("The backup file couldn’t be made. Try again.")}
+};
+$("#bfLoad").onclick=()=>$("#bfInput").click();
+$("#bfInput").onchange=async e=>{const f=e.target.files[0];e.target.value="";if(!f)return;
+  busy("Reading the backup file…",0);
+  try{const buf=new Uint8Array(await f.arrayBuffer()),dv=new DataView(buf.buffer),map={},dec=new TextDecoder();let o=0;
+    while(o+30<=buf.length&&dv.getUint32(o,true)===0x04034b50){const method=dv.getUint16(o+8,true),size=dv.getUint32(o+18,true),nl=dv.getUint16(o+26,true),xl=dv.getUint16(o+28,true);
+      const name=dec.decode(buf.subarray(o+30,o+30+nl)),start=o+30+nl+xl;if(method!==0)throw new Error("compressed");
+      map[name]=buf.slice(start,start+size);o=start+size}
+    if(!map["backup.json"])throw new Error("notbackup");
+    const meta=JSON.parse(dec.decode(map["backup.json"]));
+    const added=await restoreFrom(meta.docs||[],async(docId,name)=>map[`${docId}/${name}`]?new Blob([map[`${docId}/${name}`]],{type:"image/jpeg"}):null,(i,n)=>busy(`Restoring page ${i} of ${n}…`,i/Math.max(1,n)));
+    busy(null);toast(added?`Restored ${added} ${added===1?"page":"pages"}`:"Everything in this backup is already on this device");scheduleBackup()}
+  catch(x){busy(null);toast(x&&x.message==="notbackup"?"That isn’t a DocScan Pro backup file.":"That backup file couldn’t be read.")}
+};
+
 /* ================= Me (settings) ================= */
 $("#sProfile").innerHTML=PROFILES.map(([id,n])=>`<option value="${id}">${n}</option>`).join("");
-function loadMe(){$("#sAuto").checked=settings.autoCapture;$("#sStraight").checked=settings.autoStraighten;$("#sTidy").checked=settings.tidy;$("#sStructure").checked=settings.structure!==false;$("#sClarity").checked=settings.clarity!==false;
+function loadMe(){renderAccount();$("#sAuto").checked=settings.autoCapture;$("#sStraight").checked=settings.autoStraighten;$("#sTidy").checked=settings.tidy;$("#sStructure").checked=settings.structure!==false;$("#sClarity").checked=settings.clarity!==false;
   $("#sSens").value=settings.sens;$("#sProfile").value=settings.profile;$("#sPaper").value=settings.paper;$("#sShareQ").value=settings.shareQ||"normal";updateStorage()}
 async function updateStorage(){
   let t="Documents are saved in this browser only. Clearing your browser data removes them, so share or save anything you need to keep.";
@@ -2005,6 +2195,7 @@ try{if(window.claude&&window.claude.use)window.claude.use("downloads").then(d=>{
   try{store.db=await idbOpen()}catch(e){store.mem={docs:new Map(),pages:new Map()}}
   try{await loadDocs()}catch(e){store.mem={docs:new Map(),pages:new Map()};S.docs=[]}
   route();
+  try{renderAccount()}catch(e){}
 })();
 })();
 </script>
