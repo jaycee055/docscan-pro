@@ -13,6 +13,7 @@ PDF, JPG or PNG. No account, no subscription. Everything runs on your device; no
 - Import one or many photos
 - Automatic edge detection and perspective correction, with draggable corners, undo/redo and reset
 - Automatic text straightening and edge/margin tidying
+- Structure alignment: detects table borders, ruled lines and columns, squares the table frame (rotation, slant, leftover keystone) and flattens bowed lines from curled paper. It only moves pixels, so text, numbers, signatures and stamps are preserved exactly
 - Looks: Smart, Clean, Original color, Gray, High contrast, Untouched; brightness, contrast, sharpen
 - Quality score per page with warnings (blur, cut-off, dark, shadows, low resolution, blank, duplicate)
 - Multi-page documents: reorder, rotate, duplicate, replace, delete

@@ -330,6 +330,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
       <h2>Scanning</h2>
       <label class="check">Capture automatically when the page is steady<input class="switch" type="checkbox" id="sAuto"></label>
       <label class="check">Straighten crooked text<input class="switch" type="checkbox" id="sStraight"></label>
+      <label class="check">Align tables, lines and columns<input class="switch" type="checkbox" id="sStructure"></label>
       <label class="check">Tidy edges and margins<input class="switch" type="checkbox" id="sTidy"></label>
       <label class="field">Detection sensitivity<select id="sSens"><option value="low">Careful (fewer mistakes)</option><option value="normal">Balanced</option><option value="high">Quick (captures sooner)</option></select></label>
       <label class="field">Look for new pages<select id="sProfile"></select></label>
@@ -462,6 +463,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
         <label for="skew" id="skewLabel">Straighten</label><div style="display:flex;gap:8px;align-items:center"><input type="range" id="skew" min="-15" max="15" step="0.1" value="0"><button type="button" class="dbtn" id="skewAuto" style="min-height:36px;padding:4px 10px" aria-pressed="false">Auto</button></div>
       </div>
       <label class="dcheck"><input type="checkbox" id="sharpen"> Sharpen text</label>
+      <label class="dcheck"><input type="checkbox" id="structure"> Align tables and lines</label>
       <label class="dcheck"><input type="checkbox" id="tidy"> Tidy edges and margins</label>
       <label class="dcheck"><input type="checkbox" id="applyAll"> Use this look for every page</label>
     </div>
@@ -600,7 +602,7 @@ async function fileToCanvas(file){
 function scaled(c,maxSide){const k=Math.min(1,maxSide/Math.max(c.width,c.height)),o=mk(Math.max(1,Math.round(c.width*k)),Math.max(1,Math.round(c.height*k)));const x=o.getContext("2d");x.imageSmoothingQuality="high";x.drawImage(c,0,0,o.width,o.height);return o}
 
 /* ================= Settings ================= */
-const DEF={autoCapture:true,sens:"normal",profile:"smart",paper:"a4",autoStraighten:true,tidy:true,shareQ:"normal"};
+const DEF={autoCapture:true,sens:"normal",profile:"smart",paper:"a4",autoStraighten:true,tidy:true,shareQ:"normal",structure:true};
 let settings={...DEF};
 try{settings={...DEF,...JSON.parse(localStorage.getItem("dsp-settings")||"{}")}}catch(e){}
 function saveSettings(){try{localStorage.setItem("dsp-settings",JSON.stringify(settings))}catch(e){}}
@@ -799,6 +801,112 @@ function straighten(c,ang){
   x.fillStyle=paperColor(c);x.fillRect(0,0,W,H);x.translate(W/2,H/2);x.rotate(r);x.imageSmoothingQuality="high";x.drawImage(c,-c.width/2,-c.height/2);return out;
 }
 
+/* ================= Structure alignment (tables, ruled lines, columns) ================= */
+// Geometric only: pixels are moved, never redrawn, so text, numbers, signatures and stamps are kept as they are.
+function inkMask(s){
+  const w=s.width,h=s.height,d=s.getContext("2d").getImageData(0,0,w,h).data,{bg,cell,gw,gh}=bgGrid(d,w,h),m=new Uint8Array(w*h);
+  for(let y=0;y<h;y++){const gy=Math.min(gh-1,(y/cell)|0);for(let x=0;x<w;x++){const p=(y*w+x)*4,gx=Math.min(gw-1,(x/cell)|0),o=(gy*gw+gx)*3;
+    if(d[p]*.299+d[p+1]*.587+d[p+2]*.114<(bg[o]*.299+bg[o+1]*.587+bg[o+2]*.114)*.72)m[y*w+x]=1}}
+  return m;
+}
+// Long horizontal strokes in a w×h mask. Returns lines as {x0,x1,a,b,xs,ys} with y = a·x + b.
+function findHLines(mask,w,h,minRun,minExt){
+  const m2=new Uint8Array(w*h);
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){const i=y*w+x;m2[i]=mask[i]|(y>0?mask[i-w]:0)|(y<h-1?mask[i+w]:0)}
+  const R=new Uint8Array(w*h);
+  for(let y=0;y<h;y++){let x=0;while(x<w){if(!m2[y*w+x]){x++;continue}let e=x;while(e<w&&m2[y*w+e])e++;if(e-x>=minRun)for(let k=x;k<e;k++)R[y*w+k]=1;x=e}}
+  const seen=new Uint8Array(w*h),stack=new Int32Array(w*h),lines=[];
+  for(let i=0;i<w*h;i++){
+    if(!R[i]||seen[i])continue;let sp=0,n=0,x0=w,x1=-1;stack[sp++]=i;seen[i]=1;const px=[];
+    while(sp){const p=stack[--sp],x=p%w,y=(p-x)/w;px.push(p);n++;if(x<x0)x0=x;if(x>x1)x1=x;
+      for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){if(!dx&&!dy)continue;const xx=x+dx,yy=y+dy;if(xx<0||yy<0||xx>=w||yy>=h)continue;const q=yy*w+xx;if(R[q]&&!seen[q]){seen[q]=1;stack[sp++]=q}}}
+    const ext=x1-x0+1;if(ext<minExt||n/ext>9)continue;
+    const sy=new Float64Array(ext),cn=new Uint32Array(ext);
+    for(const p of px){const x=p%w;sy[x-x0]+=(p-x)/w;cn[x-x0]++}
+    const xs=[],ys=[];for(let k=0;k<ext;k++)if(cn[k]){xs.push(x0+k);ys.push(sy[k]/cn[k])}
+    if(xs.length<ext*.6)continue;
+    let mx=0,my=0;for(let k=0;k<xs.length;k++){mx+=xs[k];my+=ys[k]}mx/=xs.length;my/=xs.length;
+    let sxx=0,sxy=0;for(let k=0;k<xs.length;k++){sxx+=(xs[k]-mx)**2;sxy+=(xs[k]-mx)*(ys[k]-my)}
+    const a=sxx?sxy/sxx:0;if(Math.abs(a)>.18)continue;
+    lines.push({x0,x1,a,b:my-a*mx,xs,ys,mid:my});
+  }
+  return lines;
+}
+function findVLines(mask,w,h,minRun,minExt){
+  const t=new Uint8Array(w*h);for(let y=0;y<h;y++)for(let x=0;x<w;x++)t[x*h+y]=mask[y*w+x];
+  return findHLines(t,h,w,minRun,minExt); // in these, "x" is the row and "y" is the column: column = a·row + b
+}
+function detectStructure(s){
+  const w=s.width,h=s.height,m=inkMask(s);
+  const H=findHLines(m,w,h,Math.max(20,w*.03),w*.3),V=findVLines(m,w,h,Math.max(20,h*.03),h*.15);
+  return {H,V,w,h};
+}
+function lerpGrid(G,gw,gh,x,y){
+  if(x<0)x=0;if(y<0)y=0;if(x>gw-1)x=gw-1;if(y>gh-1)y=gh-1;
+  const x0=x|0,y0=y|0,x1=Math.min(gw-1,x0+1),y1=Math.min(gh-1,y0+1),fx=x-x0,fy=y-y0;
+  const a=G[y0*gw+x0],b=G[y0*gw+x1],c=G[y1*gw+x0],d=G[y1*gw+x1];return (a+(b-a)*fx)+((c+(d-c)*fx)-(a+(b-a)*fx))*fy;
+}
+// Residual bends of each long line, interpolated between lines, as a coarse displacement grid.
+function bendField(lines,w,h,cell,horiz){
+  const L=lines.map(l=>{const tgt=l.ys.slice().sort((p,q)=>p-q)[l.ys.length>>1];const dv=l.ys.map(v=>v-tgt);
+    const k=7,sm=dv.map((_,i)=>{let s=0,n=0;for(let j=Math.max(0,i-k);j<=Math.min(dv.length-1,i+k);j++){s+=dv[j];n++}return s/n});
+    return {xs:l.xs,d:sm,tgt,max:Math.max(...sm.map(Math.abs))}}).filter(l=>l.max<(horiz?h:w)*.03).sort((p,q)=>p.tgt-q.tgt);
+  if(!L.length||L.every(l=>l.max<1.2))return null;
+  const at=(l,x)=>{const xs=l.xs;if(x<=xs[0])return l.d[0];if(x>=xs[xs.length-1])return l.d[l.d.length-1];
+    let lo=0,hi=xs.length-1;while(hi-lo>1){const md=(lo+hi)>>1;if(xs[md]<=x)lo=md;else hi=md}return l.d[lo]};
+  const A=horiz?w:h,B=horiz?h:w,ga=Math.ceil(A/cell)+1,gb=Math.ceil(B/cell)+1,G=new Float32Array(ga*gb);
+  for(let ib=0;ib<gb;ib++){const pb=ib*cell;let up=null,dn=null;for(const l of L){if(l.tgt<=pb)up=l;else{dn=l;break}}
+    for(let ia=0;ia<ga;ia++){const pa=ia*cell;let v;
+      if(up&&dn){const t=(pb-up.tgt)/(dn.tgt-up.tgt);v=at(up,pa)*(1-t)+at(dn,pa)*t}else v=at(up||dn,pa);
+      if(horiz)G[ib*ga+ia]=v;else G[ia*gb+ib]=v}}
+  return horiz?{G,gw:ga,gh:gb}:{G,gw:gb,gh:ga};
+}
+const rotHomog=(w,h,th)=>{const cx=w/2,cy=h/2,c=Math.cos(th),s=Math.sin(th),r=(x,y)=>({x:cx+(x-cx)*c-(y-cy)*s,y:cy+(x-cx)*s+(y-cy)*c});
+  return homography([{x:0,y:0},{x:w,y:0},{x:w,y:h},{x:0,y:h}],[r(0,0),r(w,0),r(w,h),r(0,h)])};
+const applyH=(M,x,y)=>{const z=M[6]*x+M[7]*y+1;return [(M[0]*x+M[1]*y+M[2])/z,(M[3]*x+M[4]*y+M[5])/z]};
+function remapSmall(s,M){const w=s.width,h=s.height,sd=s.getContext("2d").getImageData(0,0,w,h),out=mk(w,h),ox=out.getContext("2d"),od=ox.createImageData(w,h),o=od.data,d=sd.data;
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){let [u,v]=applyH(M,x+.5,y+.5);u=Math.round(u-.5);v=Math.round(v-.5);const i=(y*w+x)*4;
+    if(u<0||v<0||u>=w||v>=h){o[i]=o[i+1]=o[i+2]=255}else{const j=(v*w+u)*4;o[i]=d[j];o[i+1]=d[j+1];o[i+2]=d[j+2]}o[i+3]=255}
+  ox.putImageData(od,0,0);return out}
+// Returns {canvas, info} with the page squared to its table/ruled-line structure, or the input when nothing reliable is found.
+function alignStructure(c){
+  const s=scaled(c,1100),w=s.width,h=s.height,k=w/c.width;let M=null,info={lines:0,angle:0,frame:false,bend:false};
+  const st=detectStructure(s);info.lines=st.H.length+st.V.length;
+  const Hs=st.H.filter(l=>l.x1-l.x0>=w*.35).sort((p,q)=>p.mid-q.mid),Vs=st.V.filter(l=>l.x1-l.x0>=h*.2).sort((p,q)=>p.mid-q.mid);
+  // 1. square the outer frame (rotation, slant and leftover keystone in one step)
+  if(Hs.length>=2&&Vs.length>=2&&Hs[Hs.length-1].mid-Hs[0].mid>h*.2&&Vs[Vs.length-1].mid-Vs[0].mid>w*.25){
+    const T=Hs[0],B=Hs[Hs.length-1],Lf=Vs[0],Rt=Vs[Vs.length-1];
+    const X=(hl,vl)=>{const x=(vl.a*hl.b+vl.b)/(1-vl.a*hl.a);return {x,y:hl.a*x+hl.b}};
+    const Q=[X(T,Lf),X(T,Rt),X(B,Rt),X(B,Lf)];
+    const R=[{x:(Q[0].x+Q[3].x)/2,y:(Q[0].y+Q[1].y)/2},{x:(Q[1].x+Q[2].x)/2,y:(Q[0].y+Q[1].y)/2},{x:(Q[1].x+Q[2].x)/2,y:(Q[2].y+Q[3].y)/2},{x:(Q[0].x+Q[3].x)/2,y:(Q[2].y+Q[3].y)/2}];
+    const dev=Math.max(...Q.map((q,i)=>Math.hypot(q.x-R[i].x,q.y-R[i].y)));
+    if(dev>.6&&dev<Math.max(w,h)*.08&&maxAngleDev(Q)<12){M=homography(R,Q);info.frame=true}
+  }
+  // 1b. no full frame: level the page by its long lines
+  if(!M){const pool=Hs.length?Hs.map(l=>Math.atan(l.a)):Vs.map(l=>-Math.atan(l.a));
+    if(pool.length){pool.sort((p,q)=>p-q);const th=pool[pool.length>>1];if(Math.abs(th)>.0026&&Math.abs(th)<.17){M=rotHomog(w,h,th);info.angle=th*180/Math.PI}}}
+  // 2. flatten lines that still bow (page curl, wavy paper)
+  const s2=M?remapSmall(s,M):s,st2=M?detectStructure(s2):st,cell=4;
+  const fy=bendField(st2.H.filter(l=>l.x1-l.x0>=w*.4),w,h,cell,true),fx=bendField(st2.V.filter(l=>l.x1-l.x0>=h*.3),w,h,cell,false);
+  info.bend=!!(fy||fx);
+  if(!M&&!fy&&!fx)return {canvas:c,info};
+  // 3. one full-resolution resample: output → (bend) → (frame) → source
+  const W=c.width,Hh=c.height,src=c.getContext("2d").getImageData(0,0,W,Hh),sd=src.data,out=mk(W,Hh),ox=out.getContext("2d"),od=ox.createImageData(W,Hh),o=od.data;
+  const pc=paperColor(c).match(/\d+/g).map(Number);let i=0;
+  for(let Y=0;Y<Hh;Y++){const y=(Y+.5)*k;
+    for(let X=0;X<W;X++){let x=(X+.5)*k,yy=y;
+      if(fy)yy+=lerpGrid(fy.G,fy.gw,fy.gh,x/cell,y/cell);
+      if(fx)x+=lerpGrid(fx.G,fx.gw,fx.gh,(X+.5)*k/cell,y/cell);
+      let u=x,v=yy;if(M){const r=applyH(M,x,yy);u=r[0];v=r[1]}
+      u=u/k-.5;v=v/k-.5;
+      if(u<-1||v<-1||u>W||v>Hh){o[i]=pc[0];o[i+1]=pc[1];o[i+2]=pc[2]}
+      else{if(u<0)u=0;if(v<0)v=0;if(u>W-1)u=W-1;if(v>Hh-1)v=Hh-1;
+        const x0=u|0,y0=v|0,x1=x0<W-1?x0+1:x0,y1=y0<Hh-1?y0+1:y0,fu=u-x0,fv=v-y0,p00=(y0*W+x0)*4,p10=(y0*W+x1)*4,p01=(y1*W+x0)*4,p11=(y1*W+x1)*4;
+        for(let ch=0;ch<3;ch++){const t=sd[p00+ch]+(sd[p10+ch]-sd[p00+ch])*fu,b=sd[p01+ch]+(sd[p11+ch]-sd[p01+ch])*fu;o[i+ch]=t+(b-t)*fv}}
+      o[i+3]=255;i+=4}}
+  ox.putImageData(od,0,0);return {canvas:out,info};
+}
+
 /* ================= Document tidy ================= */
 // Removes dark border strips (table, shadows, fill left by straightening), then frames the
 // printed content with even white margins so the page looks like a clean document.
@@ -865,7 +973,7 @@ const qLabel=s=>s>=90?"Excellent":s>=75?"Good":s>=60?"Fair":"Rescan";
 async function renderPage(page,src,cache){
   const W=src.width,H=src.height;
   const srcData=(cache&&cache.srcData)||src.getContext("2d").getImageData(0,0,W,H);
-  const warped=warp(srcData,denorm(page.quad,W,H));
+  let warped=warp(srcData,denorm(page.quad,W,H));if(page.structure!==false)warped=alignStructure(warped).canvas;
   if(page.skewMode==="auto"&&page.skew==null)page.skew=estimateSkew(warped);
   let out=applyAdj(applyProfile(warped,page.profile),page.adj);out=straighten(out,page.skew||0);
   if(page.tidy!==false)out=tidyPage(out,!["color","none"].includes(page.profile));out=rotate(out,page.rot);
@@ -882,7 +990,7 @@ async function newPageFromCanvas(src,docId,det){
   if(!det){const r=detectDoc(src);det=r.det}
   if(det&&settings.tidy!==false)det={...det,quad:expandQuad(det.quad,.025)};
   const ok=det&&det.conf>=.45;
-  const page={id:uid(),docId,createdAt:Date.now(),quad:ok?det.quad:defaultQuadN(),autoQuad:ok?det.quad:defaultQuadN(),conf:ok?det.conf:0,
+  const page={id:uid(),docId,createdAt:Date.now(),quad:ok?det.quad:fullQuadN(),autoQuad:ok?det.quad:fullQuadN(),structure:settings.structure!==false,conf:ok?det.conf:0,
     rot:0,profile:settings.profile,adj:{brightness:0,contrast:0,sharpen:true},srcW:src.width,srcH:src.height,
     skewMode:settings.autoStraighten?"auto":"manual",skew:settings.autoStraighten?null:0,tidy:settings.tidy};
   page.original=await canvasToBlob(src,"image/jpeg",.92);
@@ -1313,7 +1421,7 @@ async function finishId(){
     });
     const d=await camDoc("ID Card");
     const page={id:uid(),docId:d.id,createdAt:Date.now(),quad:fullQuadN(),autoQuad:fullQuadN(),conf:1,rot:0,profile:"none",
-      adj:{brightness:0,contrast:0,sharpen:false},srcW:W,srcH:H,skewMode:"manual",skew:0,tidy:false};
+      adj:{brightness:0,contrast:0,sharpen:false},srcW:W,srcH:H,skewMode:"manual",skew:0,tidy:false,structure:false};
     page.original=await canvasToBlob(c,"image/jpeg",.92);await renderPage(page,c);await savePage(page);
     S.pages.push(page);d.pageOrder=S.pages.map(p=>p.id);await touchDoc(d);busy(null);
     toast(sides.length===2?"ID card saved, front and back on one page":"ID card front saved");go("doc-"+d.id);
@@ -1364,7 +1472,7 @@ const safeName=s=>(s||"Scan").replace(/[\\/:*?"<>|]+/g,"-").replace(/\.(pdf|jpg|
 
 /* ================= Me (settings) ================= */
 $("#sProfile").innerHTML=PROFILES.map(([id,n])=>`<option value="${id}">${n}</option>`).join("");
-function loadMe(){$("#sAuto").checked=settings.autoCapture;$("#sStraight").checked=settings.autoStraighten;$("#sTidy").checked=settings.tidy;
+function loadMe(){$("#sAuto").checked=settings.autoCapture;$("#sStraight").checked=settings.autoStraighten;$("#sTidy").checked=settings.tidy;$("#sStructure").checked=settings.structure!==false;
   $("#sSens").value=settings.sens;$("#sProfile").value=settings.profile;$("#sPaper").value=settings.paper;$("#sShareQ").value=settings.shareQ||"normal";updateStorage()}
 async function updateStorage(){
   let t="Documents are saved in this browser only. Clearing your browser data removes them, so share or save anything you need to keep.";
@@ -1375,6 +1483,7 @@ async function updateStorage(){
 $("#sAuto").onchange=e=>{settings.autoCapture=e.target.checked;saveSettings()};
 $("#sStraight").onchange=e=>{settings.autoStraighten=e.target.checked;saveSettings()};
 $("#sTidy").onchange=e=>{settings.tidy=e.target.checked;saveSettings()};
+$("#sStructure").onchange=e=>{settings.structure=e.target.checked;saveSettings()};
 $("#sSens").onchange=e=>{settings.sens=e.target.value;saveSettings()};
 $("#sProfile").onchange=e=>{settings.profile=e.target.value;saveSettings()};
 $("#sPaper").onchange=e=>{settings.paper=e.target.value;saveSettings()};
@@ -1393,10 +1502,10 @@ async function openEditor(page,startStep){
   try{
     const src=await blobToCanvas(page.original),W=src.width,H=src.height;
     E={page,src,srcData:src.getContext("2d").getImageData(0,0,W,H),quad:denorm(page.quad,W,H),profile:page.profile,adj:{...page.adj},rot:page.rot,
-      skewMode:page.skewMode==="auto"?"auto":"manual",skew:page.skew||0,tidy:page.tidy!==false,
+      skewMode:page.skewMode==="auto"?"auto":"manual",skew:page.skew||0,tidy:page.tidy!==false,structure:page.structure!==false,
       hist:[],hi:-1,cache:{},manual:false,step:"crop"};
     pushHist();
-    $("#brightness").value=E.adj.brightness||0;$("#contrast").value=E.adj.contrast||0;$("#sharpen").checked=!!E.adj.sharpen;$("#tidy").checked=E.tidy;$("#applyAll").checked=false;
+    $("#brightness").value=E.adj.brightness||0;$("#contrast").value=E.adj.contrast||0;$("#sharpen").checked=!!E.adj.sharpen;$("#tidy").checked=E.tidy;$("#structure").checked=E.structure;$("#applyAll").checked=false;
     ed.classList.add("on");document.body.style.overflow="hidden";$("#adjPanel").hidden=true;$("#adjToggle").setAttribute("aria-pressed","false");
     if(startStep==="adjust"){setStep("adjust");await processEd()}else setStep("crop");
   }catch(e){toast("This page’s original photo couldn’t be opened.")}finally{busy(null)}
@@ -1449,8 +1558,8 @@ $("#nextBtn").onclick=async()=>{if(quadArea(E.quad)<.01*E.src.width*E.src.height
 async function processEd(){
   const b=$("#edBusy");b.classList.add("on");await tick();
   try{
-    const key=JSON.stringify(orderQuad(E.quad).map(p=>[Math.round(p.x),Math.round(p.y)]));
-    if(E.cache.key!==key){const warped=warp(E.srcData,E.quad);E.cache={key,warped,prof:{}};buildChips(warped);if(E.skewMode==="auto")E.skew=estimateSkew(warped)}
+    const key=JSON.stringify(orderQuad(E.quad).map(p=>[Math.round(p.x),Math.round(p.y)]))+E.structure;
+    if(E.cache.key!==key){let warped=warp(E.srcData,E.quad);if(E.structure)warped=alignStructure(warped).canvas;E.cache={key,warped,prof:{}};buildChips(warped);if(E.skewMode==="auto")E.skew=estimateSkew(warped)}
     syncSkewUI();
     if(!E.cache.prof[E.profile])E.cache.prof[E.profile]=applyProfile(E.cache.warped,E.profile);
     const base=E.cache.prof[E.profile],copy=mk(base.width,base.height);copy.getContext("2d").drawImage(base,0,0);
@@ -1470,6 +1579,7 @@ function buildChips(warped){const box=$("#filters");box.innerHTML="";const small
 let slT;["brightness","contrast"].forEach(k=>$("#"+k).addEventListener("input",e=>{E.adj[k]=+e.target.value;clearTimeout(slT);slT=setTimeout(processEd,180)}));
 $("#sharpen").onchange=e=>{E.adj.sharpen=e.target.checked;processEd()};
 $("#tidy").onchange=e=>{E.tidy=e.target.checked;processEd()};
+$("#structure").onchange=e=>{E.structure=e.target.checked;processEd()};
 function syncSkewUI(){if(!E)return;$("#skew").value=E.skew;$("#skewLabel").textContent=`Straighten ${E.skew>0?"+":""}${(+E.skew).toFixed(1)}°`;$("#skewAuto").setAttribute("aria-pressed",String(E.skewMode==="auto"))}
 $("#skew").addEventListener("input",e=>{E.skewMode="manual";E.skew=+e.target.value;syncSkewUI();clearTimeout(slT);slT=setTimeout(processEd,180)});
 $("#skewAuto").onclick=async()=>{if(!E||!E.cache.warped)return;E.skewMode="auto";E.skew=estimateSkew(E.cache.warped);syncSkewUI();await processEd();
@@ -1482,7 +1592,7 @@ cmp.addEventListener("pointerdown",()=>showOrig(true));["pointerup","pointerleav
 cmp.onclick=e=>e.preventDefault();
 $("#saveBtn").onclick=async()=>{
   const p=E.page,W=E.src.width,H=E.src.height,applyAll=$("#applyAll").checked;
-  p.quad=norm(E.quad,W,H);p.conf=E.manual?1:(E.detConf??p.conf);p.profile=E.profile;p.adj={...E.adj};p.rot=E.rot;p.skewMode=E.skewMode;p.skew=E.skew;p.tidy=E.tidy;
+  p.quad=norm(E.quad,W,H);p.conf=E.manual?1:(E.detConf??p.conf);p.profile=E.profile;p.adj={...E.adj};p.rot=E.rot;p.skewMode=E.skewMode;p.skew=E.skew;p.tidy=E.tidy;p.structure=E.structure;
   const src=E.src;closeEditor();busy("Saving page…",.3);
   try{
     await renderPage(p,src);await savePage(p);
