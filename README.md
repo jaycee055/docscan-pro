@@ -32,6 +32,7 @@ It is a single file. Open `index.html` in a browser, or host it with GitHub Page
 Open the file on your phone and allow installing from your browser if Android asks. Each update to the app is built automatically by GitHub Actions (`.github/workflows/android.yml`) and published on the [Releases page](https://github.com/jaycee055/docscan-pro/releases). Installing a newer APK over an older one keeps your scans.
 
 ## iPhone
+- **Now:** open the site in Safari, tap **Share → Add to Home Screen**. It installs with its own icon, opens full-screen and works offline.
 - **App Store:** `.github/workflows/ios.yml` builds the iPhone app on GitHub's Mac runners. Without Apple keys it only checks that the app builds. After joining the Apple Developer Program, add the repository secrets `APPLE_TEAM_ID`, `ASC_KEY_ID`, `ASC_ISSUER_ID` and `ASC_KEY_P8`, and every update is uploaded to TestFlight / App Store Connect.
 
 [Privacy policy](https://jaycee055.github.io/docscan-pro/privacy.html)

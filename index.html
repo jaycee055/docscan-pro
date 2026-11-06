@@ -424,6 +424,7 @@ a.btn{text-decoration:none}
       <b>Free, no limits</b>
       <span>No account needed. Your scans stay on this device.</span>
       <a class="sideapk" href="https://github.com/jaycee055/docscan-pro/releases/latest/download/DocScanPro.apk" rel="noopener">Get the Android app</a>
+      <a class="sideapk iosapk" href="#me" hidden>Install on iPhone</a>
     </div>
     <div class="sheet">
       <div class="sechead"><h2>Recents</h2><span class="rviews" role="group" aria-label="Show recents as">
@@ -486,6 +487,11 @@ a.btn{text-decoration:none}
       <p class="hint" id="sStorage"></p>
       <button type="button" class="btn" id="sPersist">Ask the browser to keep my documents</button>
       <button type="button" class="btn danger" id="sWipe">Delete all documents on this device</button>
+    </div>
+    <div class="card getios" hidden>
+      <h2>Install on iPhone</h2>
+      <p class="hint">Open this page in <b>Safari</b>, tap the <b>Share</b> button, then <b>Add to Home Screen</b>. DocScan Pro gets its own icon, opens full-screen and works offline.</p>
+      <p class="hint">An App Store version is on the way.</p>
     </div>
     <div class="card getapp">
       <h2>Android app</h2>
@@ -1670,7 +1676,7 @@ async function nativeSave(name,blob){
 const PLATFORM=NATIVE&&window.Capacitor.getPlatform?window.Capacitor.getPlatform():"web";
 const IS_IOS=PLATFORM==="ios"||/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
 const STANDALONE=matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
-if(IS_IOS&&!NATIVE)$$(".getapp,.sideapk").forEach(e=>e.hidden=true);
+if(IS_IOS&&!NATIVE){$$(".getapp,.sideapk:not(.iosapk)").forEach(e=>e.hidden=true);if(!STANDALONE){$(".getios").hidden=false;$(".iosapk").hidden=false}}
 if(!NATIVE&&"serviceWorker" in navigator&&/^https?:$/.test(location.protocol)&&!/claude\.ai|claudeusercontent/.test(location.host))
   window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
 if(NATIVE){
